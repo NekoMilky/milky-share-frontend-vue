@@ -1,0 +1,48 @@
+:root {
+    --hovered-background-color: rgba(255, 255, 255, 0.1);
+    --transition-duration: 0.3s;
+    --error-color: rgb(255, 182, 182);
+}
+
+@font-face {
+    font-family: "Aa小迷糊少女"; 
+    src: url("/src/assets/fonts/font.ttf") format("truetype"); 
+}
+
+body {
+    user-select: none;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background-image: url("/src/assets/images/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.box {
+    width: 100%;
+    height: 100%;
+    margin: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: space-around;
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 25px;
+    backdrop-filter: blur(3px);
+    font-family: "Aa小迷糊少女";
+    font-size: 1.2rem;
+    color: white;
+}
+
+.page {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
