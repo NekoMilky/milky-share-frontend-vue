@@ -1,6 +1,9 @@
 <script setup>
 import { useTagSelector } from "/src/stores/TagSelector";
-import TagSelector from "/src/components/TagSelector.vue";
+import CustomDialog from "/src/components/common/CustomDialog.vue";
+import CustomToast from "/src/components/common/CustomToast.vue";
+import RightClickMenu from "/src/components/common/RightClickMenu.vue";
+import TagSelector from "/src/components/layout/TagSelector.vue";
 import Home from "/src/views/Home.vue";
 import Playlist from "/src/views/Playlist.vue";
 import Upload from "/src/views/Upload.vue";
@@ -12,6 +15,9 @@ const tagStore = useTagSelector();
 
 <template>
     <div class="app">
+        <CustomDialog />
+        <CustomToast />
+        <RightClickMenu />
         <div class="column column-tag">
             <TagSelector />
         </div>

@@ -4,8 +4,8 @@ import { timeFormat } from "/src/utils/Utility";
 import { useMusicPlayer } from "/src/stores/MusicPlayer";
 
 import defaultCoverImg from "/src/assets/images/default/cover.png";
-import playImg from "/src/assets/images/buttons/play.png";
-import pauseImg from "/src/assets/images/buttons/pause.png";
+import playCircleImg from "/src/assets/images/buttons-circle/play.png";
+import pauseCircleImg from "/src/assets/images/buttons-circle/pause.png";
 
 const musicPlayerStore = useMusicPlayer();
 
@@ -87,17 +87,17 @@ onMounted(() => {
             <div class="column column-control">
                 <img 
                     class="control-button" 
-                    src="/src/assets/images/buttons/back.png" 
+                    src="/src/assets/images/buttons-circle/previous-song.png" 
                     @click="musicPlayerStore.switchPlay(true)"
                 />
                 <img 
                     class="control-button" 
-                    :src="musicPlayerStore.isPlaying ? pauseImg : playImg" 
+                    :src="musicPlayerStore.isPlaying ? pauseCircleImg : playCircleImg" 
                     @click="musicPlayerStore.togglePlay" 
                 />
                 <img 
                     class="control-button" 
-                    src="/src/assets/images/buttons/next.png" 
+                    src="/src/assets/images/buttons-circle/next-song.png" 
                     @click="musicPlayerStore.switchPlay(false)"
                 />
             </div>
@@ -214,7 +214,7 @@ onMounted(() => {
 .progress-track {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--selected-background-color);
     border-radius: var(--progress-track-border-radius);
     cursor: pointer;
 }

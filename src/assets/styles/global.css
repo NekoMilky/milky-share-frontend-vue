@@ -1,7 +1,14 @@
 :root {
     --hovered-background-color: rgba(255, 255, 255, 0.1);
+    --selected-background-color: rgba(255, 255, 255, 0.2);
     --transition-duration: 0.3s;
-    --error-color: rgb(255, 182, 182);
+    --error-color: rgba(255, 62, 63, 0.9);
+    --success-color: rgba(63, 158, 66, 0.9);
+    --warn-color: rgba(254, 176, 7, 0.9);
+    --danger-color: rgb(255, 128, 128);
+    --scrollbar-width: 6px;
+    --scrollbar-track-color: var(--selected-background-color);
+    --scrollbar-track-border-radius: 10px;
 }
 
 @font-face {
@@ -22,14 +29,14 @@ body {
 .box {
     width: 100%;
     height: 100%;
-    margin: 5px;
-    padding: 10px;
+    margin: 0.25em;
+    padding: 0.5em;
     box-sizing: border-box;
     align-items: center;
     justify-content: space-around;
     display: flex;
     background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 25px;
+    border-radius: 1.5em;
     backdrop-filter: blur(3px);
     font-family: "Aa小迷糊少女";
     font-size: 1.2rem;
@@ -39,10 +46,67 @@ body {
 .page {
     width: 100%;
     height: 100%;
-    padding: 10px;
+    padding: 0.5em;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.search-bar {
+    font-size: 1em;
+    font-family: "Aa小迷糊少女";
+    color: white;
+    width: 90%;
+    padding: 0 1em 0 2em;
+    box-sizing: border-box;
+    background-color: transparent;
+    border-radius: 1em;
+    border: none;
+    outline: none;
+    background-image: url("/src/assets/images/buttons/search.png");
+    background-size: 1em;
+    background-position: 0.6em center;
+    background-repeat: no-repeat;
+    transition: var(--transition-duration);
+}
+
+.search-bar:focus, .search-bar:hover {
+    background-color: var(--hovered-background-color);
+}
+
+.search-bar::placeholder {
+    color: rgb(192, 192, 192)
+}
+
+.scrollbar-column::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+    opacity: 0;
+}
+
+.scrollbar-column::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: var(--scrollbar-track-border-radius);
+}
+
+.scrollbar-column::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--scrollbar-track-border-radius);
+}
+
+.scrollbar-column:hover::-webkit-scrollbar {
+    opacity: 1;
+}
+
+.scrollbar-column:hover::-webkit-scrollbar-track {
+    background-color: var(--scrollbar-track-color);
+}
+
+.scrollbar-column:hover::-webkit-scrollbar-thumb {
+    background-color: white;
+}
+
+.scrollbar-column:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(192, 192, 192);
 }

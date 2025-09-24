@@ -1,10 +1,12 @@
 import { defineStore } from "pinia";
 import { ref, computed, onMounted } from "vue";
-import { getMusic } from "/src/api/Music";
-import { useMusicList } from "/src/stores/MusicList";
+import { get } from "/src/api/Song";
+import { useToast } from "/src/stores/Toast";
+import { useSongList } from "/src/stores/SongList";
 
 export const useMusicPlayer = defineStore("MusicPlayer", () => {
-    const musicListStore = useMusicList();
+    const toastStore = useToast();
+    const songListStore = useSongList();
 
     // 当前播放音乐
     const audio = ref(null);
@@ -34,10 +36,14 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
     };
     const isLoading = ref(false);
     const loadSong = async (songId, autoPlay = true) => {
+        if (!songId || songId === "") {
+            return;
+        }
         isLoading.value = true;
-        const response = await getMusic(songId);
+        const response = await get(songId);
         clearSong();
         if (!response.success) {
+            toastStore.addMessage(response);
             console.error(response.message);
             isLoading.value = false;
             return;
@@ -108,11 +114,11 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         if (!isAudioLoaded.value) {
             return;
         }
-        let index = musicListStore.musicList.findIndex((song) => playingSong.value.id === song.id);
+        let index = songListStore.songList.findIndex((song) => playingSong.value.id === song.id);
         if (index === -1) {
             return;
         }
-        const length = musicListStore.musicList.length;
+        const length = songListStore.songList.length;
         index += (isPrevious ? -1 : 1);
         if (index < 0) {
             index = length - 1;
@@ -120,7 +126,7 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         else if (index > length - 1) {
             index = 0;
         }
-        loadSong(musicListStore.musicList[index].id);
+        loadSong(songListStore.songList[index].id);
     };
 
     // 封面旋转

@@ -5,18 +5,17 @@ import { fileURLToPath } from "url";
 
 const app = express();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
 const PORT = process.env.PORT || 8080;
 const HOST = process.env.HOST || "0.0.0.0";
 
 // 设置静态文件目录为dist
-app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(DIRNAME, '../dist')));
 
 // 处理单页应用路由问题
 app.use((request, response) => {
-    response.sendFile(path.join(__dirname, '../dist/index.html'));
+    response.sendFile(path.join(DIRNAME, '../dist/index.html'));
 });
 
 app.listen(PORT, HOST, () => {

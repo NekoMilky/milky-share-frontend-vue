@@ -1,6 +1,6 @@
 import { sendPost } from "/src/api/Index";
 
-export const userLogin = async (nickname, password) => {
+export const login = async (nickname, password) => {
     const formData = new FormData();
     formData.append("nickname", nickname);
     formData.append("password", password);
@@ -8,7 +8,7 @@ export const userLogin = async (nickname, password) => {
     return response;
 };
 
-export const userRegister = async (nickname, password) => {
+export const register = async (nickname, password) => {
     const formData = new FormData();
     formData.append("nickname", nickname);
     formData.append("password", password);
@@ -16,18 +16,25 @@ export const userRegister = async (nickname, password) => {
     return response;
 };
 
-export const getUser = async (id) => {
+export const get = async (userId) => {
     const formData = new FormData();
-    formData.append("id", id);
+    formData.append("userId", userId);
     const response = await sendPost("user/get", formData, {});
     return response;
 };
 
-export const saveUserProfile = async (avatarFile, userInfo) => {
+export const saveProfile = async (avatarFile, userInfo) => {
     const formData = new FormData();
     formData.append("avatar", avatarFile);
-    formData.append("id", userInfo.id);
+    formData.append("userId", userInfo.id);
     formData.append("nickname", userInfo.nickname);
     const response = await sendPost("user/save_profile", formData, {});
+    return response;
+};
+
+export const checkNickname = async (nickname) => {
+    const formData = new FormData();
+    formData.append("nickname", nickname);
+    const response = await sendPost("user/check_nickname", formData, {});
     return response;
 };

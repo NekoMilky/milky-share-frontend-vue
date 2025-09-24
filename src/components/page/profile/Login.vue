@@ -1,7 +1,10 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { checkNickname } from "/src/api/User";
+import { useToast } from "/src/stores/Toast";
 import { useUser } from "/src/stores/User";
 
+const toastStore = useToast();
 const userStore = useUser();
 
 // 标签选择
@@ -25,7 +28,6 @@ const clearInput = () => {
     nickname.value = "";
     password.value = "";
     confirmPassword.value = "";
-    response.value = {};
 }
 
 // 密码强度
@@ -43,9 +45,23 @@ const hasSpecialChar = computed(() => {
 });
 
 // 问题实时反馈
+const isNicknameUsable = ref(true);
+watch(() => nickname.value, async (value) => {
+    if (isTag("register") && value !== "") {
+        const response = await checkNickname(value);
+        isNicknameUsable.value = response.data.usable;
+        console.log(isNicknameUsable.value);
+    }
+});
 const issue = computed(() => {
-    if (nickname.value === "" || password.value === "") {
-        return "昵称或密码不可为空";
+    if (nickname.value === "") {
+        return "昵称不可为空";
+    }
+    if (isTag("register") && !isNicknameUsable.value) {
+        return "昵称不可用";
+    }
+    if (password.value === "") {
+        return "密码不可为空";
     }
     if (isTag("register")) {
         if (!hasSuitableLen.value) {
@@ -68,20 +84,19 @@ const issue = computed(() => {
 });
 
 // 注册与登录
-const response = ref({});
-const login = async () => {
-    response.value = {};
+const login = () => {
     if (issue.value) {
+        toastStore.addMessage({ message: issue.value, success: false })
         return;
     }
-    response.value = await userStore.login(nickname.value, password.value);
+    userStore.userLogin(nickname.value, password.value);
 }
-const register = async () => {
-    response.value = {};
+const register = () => {
     if (issue.value) {
+        toastStore.addMessage({ message: issue.value, success: false })
         return;
     }
-    response.value = await userStore.register(nickname.value, password.value);
+    userStore.userRegister(nickname.value, password.value);
 }
 </script>
 
@@ -107,8 +122,7 @@ const register = async () => {
                 type="password" 
                 placeholder="确认密码" 
             />
-            <div class="issue" v-if="issue">{{ issue }}</div>
-            <div class="issue" v-if="response.message">{{ response.message }}</div>
+            <div class="danger" v-if="issue">{{ issue }}</div>
             <div v-if="isTag('login')" class="button" @click="login">登录</div>
             <div v-if="isTag('register')" class="button" @click="register">注册</div>
         </div>
@@ -208,8 +222,8 @@ const register = async () => {
     background-image: url("/src/assets/images/buttons/confirm.png");
 }
 
-.issue {
-    color: var(--error-color);
+.danger {
+    color: var(--danger-color);
     font-size: 0.8em;
 }
 
@@ -227,6 +241,6 @@ const register = async () => {
 }
 
 .tag-selected {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--selected-background-color);
 }
 </style>

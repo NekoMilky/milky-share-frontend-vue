@@ -1,9 +1,13 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
+import { useToast } from "/src/stores/Toast";
+import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
 
 import defaultAvatarImg from "/src/assets/images/default/avatar.png";
 
+const toastStore = useToast();
+const dialogStore = useDialog();
 const userStore = useUser();
 
 const avatarInput = ref(null);
@@ -53,22 +57,27 @@ const fileToFile = async (file, maxSize = 256) => {
         return new File([blobCompressed], `file.${filePostfix}`, { type: format });
     }
     catch (error) {
-        console.error("无法将File对象转为File对象：", error);
+        const message = "无法将File对象转为File对象";
+        console.error(message, error);
+        toastStore.addMessage({ message: message, success: false });
         return null;
     }
 };
 
 // 保存档案
-const response = ref({});
-const saveProfile = async () => {
-    response.value = {};
-    response.value = await userStore.saveProfile(selectedFile.value);
+const saveProfileRows = [{ key: "title", type: "text", text: "保存档案确认" }];
+const openSaveProfile = () => {
+    dialogStore.loadDialog(saveProfileRows, submitSaveProfile);
+};
+const submitSaveProfile = async () => {
+    await userStore.userSaveProfile(selectedFile.value);
 }
 
-// 初始化
-onMounted(() => {
-    userStore.updateProfile();
-});
+// 退出登录
+const logoutRows = [{ key: "title", type: "text", text: "退出登录确认" }];
+const openLogout = () => {
+    dialogStore.loadDialog(logoutRows, userStore.userLogout);
+};
 </script>
 
 <template>
@@ -91,18 +100,11 @@ onMounted(() => {
                     <div class="info-text">昵称</div>
                     <input v-model="userStore.user.nickname" class="info-input" type="text" placeholder="请输入昵称" />
                 </div>
-                <div 
-                    v-if="response.message" 
-                    class="info"
-                    :class="{ 'error': !response.success }"
-                >
-                    {{ response.message }}
-                </div>
             </div>
         </div>
         <div class="button-list">
-            <div class="button" @click="saveProfile">保存</div>
-            <div class="button error" @click="userStore.logout">退出登录</div>
+            <div class="button" @click="openSaveProfile">保存</div>
+            <div class="button danger" @click="openLogout">退出登录</div>
         </div>
     </div>
 </template>
@@ -203,7 +205,7 @@ onMounted(() => {
     background-color: var(--hovered-background-color);
 }
 
-.error {
-    color: var(--error-color);
+.danger {
+    color: var(--danger-color);
 }
 </style>

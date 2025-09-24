@@ -1,8 +1,8 @@
 <script setup>
 import { useUser } from "/src/stores/User";
-import MusicPlayer from "/src/components/MusicPlayer.vue";
-import UserProfile from "/src/components/UserProfile.vue";
-import UserLogin from "/src/components/UserLogin.vue";
+import MusicPlayer from "/src/components/common/MusicPlayer.vue";
+import Profile from "/src/components/page/profile/Profile.vue";
+import Login from "/src/components/page/profile/Login.vue";
 
 const userStore = useUser();
 </script>
@@ -10,8 +10,8 @@ const userStore = useUser();
 <template>
     <div class="page">
         <MusicPlayer />
-        <UserProfile v-if="userStore.isLogged" />
-        <UserLogin v-else />
+        <Profile v-if="userStore.isLogged" />
+        <Login v-else />
     </div>
 </template>
 

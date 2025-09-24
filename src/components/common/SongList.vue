@@ -1,53 +1,59 @@
 <script setup>
-import { ref, nextTick, watch, onMounted, computed, defineProps, onUnmounted } from "vue";
+import { ref, nextTick, watch, onMounted, computed, onUnmounted } from "vue";
 import { timeFormat } from "/src/utils/Utility";
-import { getMusic } from "/src/api/Music";
+import { get } from "/src/api/Song";
+import { useRightClickMenu } from "/src/stores/RightClickMenu";
+import { useUser } from "/src/stores/User";
 import { useMusicPlayer } from "/src/stores/MusicPlayer";
-import { useMusicList } from "/src/stores/MusicList";
+import { useSongList } from "/src/stores/SongList";
 
 import defaultCoverImg from "/src/assets/images/default/cover.png";
+import deleteImg from "/src/assets/images/buttons/delete.png";
 import playImg from "/src/assets/images/buttons/play.png";
 import pauseImg from "/src/assets/images/buttons/pause.png";
-import starImg from "/src/assets/images/buttons/star.png";
-import staredImg from "/src/assets/images/buttons/stared.png";
+import downloadImg from "/src/assets/images/buttons/download.png";
+import likeImg from "/src/assets/images/buttons/like.png";
+import hasLikedImg from "/src/assets/images/buttons/has-liked.png";
+import playCircleImg from "/src/assets/images/buttons-circle/play.png";
+import pauseCircleImg from "/src/assets/images/buttons-circle/pause.png";
 
+const rightClickMenuStore = useRightClickMenu();
+const userStore = useUser();
 const musicPlayerStore = useMusicPlayer();
-const musicListStore = useMusicList();
 
-const musicListHeader = ref(null);
-const getMusicListHeaderWidth = () => {
-    if (!musicListHeader.value) {
+const songListHeader = ref(null);
+const getSongListHeaderWidth = () => {
+    if (!songListHeader.value) {
         return 0;
     }
-    return parseFloat(getComputedStyle(musicListHeader.value).width);
+    return parseFloat(getComputedStyle(songListHeader.value).width);
 };
 
 const props = defineProps({
     columns: {
         type: Array,
-        default: () => [
+        default: [
             { key: "index", label: "#", sortable: false, width: 10 },
-            { key: "title", label: "标题", sortable: true, width: 40 },
-            { key: "album", label: "专辑", sortable: true, width: 15 },
+            { key: "title", label: "标题", sortable: true, width: 45 },
+            { key: "album", label: "专辑", sortable: true, width: 20 },
             { key: "duration", label: "时长", sortable: true, width: 15 },
-            { key: "star", label: "收藏", sortable: false, width: 10 },
-            { key: "download", label: "下载", sortable: false, width: 10 }
+            { key: "like", label: "喜欢", sortable: false, width: 10 }
         ]
     },
     list: {
         type: Function,
         default: () => {
-            return useMusicList().musicList;
+            return useSongList().songList;
         }
     }
 });
 
 // 音乐列表
-const musicList = computed(() => props.list());
+const songList = computed(() => props.list());
 
 // 列配置
 const columnWidths = ref({});
-const updateColumns = () => {
+const initColumns = () => {
     props.columns.forEach((column) => {
         columnWidths.value[column.key] = column.width;
     });
@@ -101,7 +107,7 @@ const dragColumn = (event) => {
     }
     // 计算新列宽
     const minWidth = 10;
-    const delta = (event.clientX - startX.value) / getMusicListHeaderWidth() * 100;
+    const delta = (event.clientX - startX.value) / getSongListHeaderWidth() * 100;
     const newWidth = Math.max(minWidth, Math.min(totalWidth.value - minWidth, startWidth.value + delta * (isLeft.value ? -1 : 1)));
     columnWidths.value[currentColumn.value] = newWidth;
     columnWidths.value[nextColumn.value] = totalWidth.value - newWidth;
@@ -118,12 +124,45 @@ const handleMouseLeave = (index) => {
     }
 };
 
+// 右键菜单
+const handleRightMenu = (event, song) => {
+    let menu = [];
+    // 播放/暂停
+    const isPlayingThis = song.id === musicPlayerStore.playingSong.id;
+    const isPlaying = musicPlayerStore.isPlaying;
+    const shouldShowPause = isPlayingThis && isPlaying;
+    menu.push({ 
+        key: "togglePlay", 
+        label: shouldShowPause ? "暂停" : "播放",
+        iconSrc: shouldShowPause ? pauseImg : playImg,
+        onClick: isPlayingThis ? () => musicPlayerStore.togglePlay : () => musicPlayerStore.loadSong(song.id)
+    });
+    // 下载
+    menu.push({
+        key: "download",
+        label: "下载",
+        iconSrc: downloadImg,
+        onClick: () => songDownload(song.id)
+    });
+    // 如果是上传者，可以删除歌曲
+    if (userStore.isLogged && song.uploader === userStore.user.id) {
+        menu.push({ 
+            key: "deleteSong", 
+            label: "删除歌曲", 
+            iconSrc: deleteImg, 
+            onClick: () => {}, 
+            danger: true 
+        });
+    }
+    rightClickMenuStore.loadMenu(event, menu);
+};
+
 // 音乐列表搜索与排序
 const searchQuery = ref("");
 const sortBy = ref("none");
 const sortDesc = ref(false);
-const finalMusicList = computed(() => {
-    let result = musicList.value;
+const finalSongList = computed(() => {
+    let result = songList.value;
     if (searchQuery.value !== "") {
         result = result.filter((song) => {
             const lowerSearchQuery = searchQuery.value.toLowerCase();
@@ -134,7 +173,7 @@ const finalMusicList = computed(() => {
         });
     }
     if (sortBy.value !== "none") {
-        result = sortMusicList(result);
+        result = sortSongList(result);
     }
     return result;
 });
@@ -152,7 +191,7 @@ const switchSortBy = (column) => {
         sortDesc.value = true;
     }
 };
-const sortMusicList = (list) => {
+const sortSongList = (list) => {
     let result = [...list];
     result.sort((a, b) => {
         let compareA, compareB;
@@ -190,22 +229,22 @@ const getColumnName = (column, label) => {
 };
 
 // 列表表头滚动条修正
-const musicListItems = ref(null);
+const songListItems = ref(null);
 const hasScrollbar = ref(false);
 const checkScrollbar = () => {
     hasScrollbar.value = false;
-    if (musicListItems.value) {
-        hasScrollbar.value = musicListItems.value.scrollHeight > musicListItems.value.clientHeight;
+    if (songListItems.value) {
+        hasScrollbar.value = songListItems.value.scrollHeight > songListItems.value.clientHeight;
     }
 };
-watch(() => finalMusicList, async () => {
+watch(() => finalSongList.value, async () => {
     await nextTick();
     checkScrollbar();
 });
 
 // 下载音乐
-const musicDownload = async (songId) => {
-    const response = await getMusic(songId);
+const songDownload = async (songId) => {
+    const response = await get(songId);
     if (!response.success) {
         console.error(response.message);
         return;
@@ -218,7 +257,7 @@ const musicDownload = async (songId) => {
 
 // 初始化
 onMounted(() => {
-    updateColumns();
+    initColumns();
     checkScrollbar();
     onUnmounted(() => {
         // 解除监听
@@ -229,17 +268,18 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="box music-list-box">
+    <div class="box song-list-box">
         <!--搜索音乐-->
-        <input v-model="searchQuery" class="music-search" type="text" placeholder="搜索标题、艺术家或专辑" />
+        <input v-model="searchQuery" class="search-bar" type="text" placeholder="搜索标题、艺术家或专辑" />
         <!--音乐列表-->
-        <div class="music-list">
+        <div class="song-list">
             <!--表头-->
-            <div class="music-list-header" ref="musicListHeader" :style="{ paddingRight: hasScrollbar ? 'var(--scrollbar-width)' : '0' }">
+            <div class="song-list-header" ref="songListHeader" :style="{ paddingRight: hasScrollbar ? 'var(--scrollbar-width)' : '0' }">
                 <div 
+                    class="column"
                     v-for="column in columns" 
                     :key="column.key"
-                    :class="['column', `column-${column.key}`, { 'column-sortable': column.sortable }]"
+                    :class="[`column-${column.key}`, { 'column-sortable': column.sortable }]"
                     :style="{ width: `${columnWidths[column.key]}%` }"
                 >
                     <div 
@@ -263,43 +303,45 @@ onMounted(() => {
                 </div>
             </div>
             <!--列表-->
-            <div class="music-list-items" ref="musicListItems">
-                <div class="music-list-empty" v-if="finalMusicList.length === 0">
+            <div class="song-list-items scrollbar-column" ref="songListItems">
+                <div class="song-list-empty" v-if="finalSongList.length === 0">
                     这里空空如也
                 </div>
                 <div 
                     v-else
-                    v-for="(song, index) in finalMusicList" 
-                    class="music-item"
+                    v-for="(song, index) in finalSongList" 
+                    class="song-item"
                     :class="{ 'playing-now': song.id === musicPlayerStore.playingSong.id }"
                     :key="index"
                     @mouseenter="handleMouseEnter(index)"
                     @mouseleave="handleMouseLeave(index)"
+                    @contextmenu.prevent="handleRightMenu($event, song)"
                 >
                     <div 
+                        class="column"
                         v-for="column in columns" 
                         :key="column.key"
-                        :class="['column', `column-${column.key}`]"
+                        :class="[`column-${column.key}`]"
                         :style="{ width: `${columnWidths[column.key]}%` }"
                     >
                         <template v-if="column.key === 'index'">
                             <img 
                                 v-if="song.id === musicPlayerStore.playingSong.id"
-                                class="music-item-button" 
-                                :src="musicPlayerStore.isPlaying ? pauseImg : playImg" 
+                                class="song-item-button" 
+                                :src="musicPlayerStore.isPlaying ? pauseCircleImg : playCircleImg" 
                                 @click="musicPlayerStore.togglePlay"
                             />
                             <img 
                                 v-else-if="mouseHoverIndex === index"
-                                class="music-item-button" 
-                                src="/src/assets/images/buttons/play.png" 
+                                class="song-item-button" 
+                                src="/src/assets/images/buttons-circle/play.png" 
                                 @click="musicPlayerStore.loadSong(song.id)" 
                             />
                             <span v-else>{{ index + 1 }}</span>
                         </template>
                         <template v-if="column.key === 'title'">
-                            <img class="music-item-cover" :src="song.cover || defaultCoverImg" />
-                            <div class="music-item-info">
+                            <img class="song-item-cover" :src="song.cover || defaultCoverImg" />
+                            <div class="song-item-info">
                                 {{ song.title }}<br />
                                 <div class="column-small-font">{{ song.artist }}</div>
                             </div>
@@ -310,18 +352,10 @@ onMounted(() => {
                         <template v-if="column.key === 'duration'">
                             {{ timeFormat(song.duration) }}
                         </template>
-                        <template v-if="column.key === 'star'">
+                        <template v-if="column.key === 'like'">
                             <img 
-                                class="music-item-button" 
-                                :src="musicListStore.isStared(song.id) ? staredImg : starImg"  
-                                @click="musicListStore.star(song.id)"
-                            />
-                        </template>
-                        <template v-if="column.key === 'download'">
-                            <img 
-                                class="music-item-button" 
-                                src="/src/assets/images/buttons/download.png" 
-                                @click="musicDownload(song.id)" 
+                                class="song-item-button"
+                                :src="likeImg"
                             />
                         </template>
                     </div>
@@ -332,43 +366,16 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.music-list-box {
+.song-list-box {
     height: 75%;
     flex-direction: column;
-
-    --scrollbar-width: 6px;
-    --scrollbar-track-color: rgba(255, 255, 255, 0.2);
-    --scrollbar-track-border-radius: 10px;
 }
 
-.music-search {
-    font-size: 1em;
-    font-family: "Aa小迷糊少女";
-    color: white;
-    width: 90%;
+.search-bar {
     height: 8%;
-    padding: 0.5em 0.5em 0.5em 2em;
-    box-sizing: border-box;
-    background-color: transparent;
-    border-radius: 1em;
-    border: none;
-    outline: none;
-    background-image: url("/src/assets/images/buttons/search.png");
-    background-size: 1em;
-    background-position: 0.6em center;
-    background-repeat: no-repeat;
-    transition: var(--transition-duration);
 }
 
-.music-search:focus, .music-search:hover {
-    background-color: var(--hovered-background-color);
-}
-
-.music-search::placeholder {
-    color: rgb(192, 192, 192)
-}
-
-.music-list {
+.song-list {
     width: 90%;
     height: 90%;
     box-sizing: border-box;
@@ -377,7 +384,7 @@ onMounted(() => {
     justify-content: space-around;
 }
 
-.music-list-header {
+.song-list-header {
     height: 10%;
     box-sizing: border-box;
     display: flex;
@@ -387,7 +394,7 @@ onMounted(() => {
     align-items: center;
 }
 
-.music-list-items {
+.song-list-items {
     height: 85%;
     box-sizing: border-box;
     overflow-x: hidden;
@@ -396,38 +403,7 @@ onMounted(() => {
     flex-direction: column;
 }
 
-.music-list-items::-webkit-scrollbar {
-    width: var(--scrollbar-width);
-    opacity: 0;
-}
-
-.music-list-items::-webkit-scrollbar-track {
-    background-color: transparent;
-    border-radius: var(--scrollbar-track-border-radius);
-}
-
-.music-list-items::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: var(--scrollbar-track-border-radius);
-}
-
-.music-list-items:hover::-webkit-scrollbar {
-    opacity: 1;
-}
-
-.music-list-items:hover::-webkit-scrollbar-track {
-    background-color: var(--scrollbar-track-color);
-}
-
-.music-list-items:hover::-webkit-scrollbar-thumb {
-    background-color: white;
-}
-
-.music-list-items:hover::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(192, 192, 192);
-}
-
-.music-list-empty {
+.song-list-empty {
     height: 100%;
     display: flex;
     flex-direction: row;
@@ -435,7 +411,7 @@ onMounted(() => {
     align-items: center;
 }
 
-.music-item {
+.song-item {
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -445,7 +421,7 @@ onMounted(() => {
     transition: background-color var(--transition-duration);
 }
 
-.music-item:hover {
+.song-item:hover {
     background-color: var(--hovered-background-color);
 }
 
@@ -460,12 +436,12 @@ onMounted(() => {
     background-color: transparent;
 }
 
-.music-list-header .column {
+.song-list-header .column {
     position: relative;
     transition: background-color var(--transition-duration);
 }
 
-.music-list-header .column:hover {
+.song-list-header .column:hover {
     background-color: var(--hovered-background-color);
 }
 
@@ -508,13 +484,13 @@ onMounted(() => {
     font-weight: bold;
 }
 
-.music-item-cover {
+.song-item-cover {
     height: 2.4em;
     aspect-ratio: 1;
     margin-right: 0.5em;
 }
 
-.music-item-button {
+.song-item-button {
     height: 1.2em;
     aspect-ratio: 1;
     padding: 0.5em;
@@ -523,7 +499,7 @@ onMounted(() => {
     transition: var(--transition-duration);
 }
 
-.music-item-button:hover {
+.song-item-button:hover {
     cursor: pointer;
     background-color: var(--hovered-background-color);
 }

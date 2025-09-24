@@ -19,15 +19,15 @@ const userStore = useUser();
             <span v-else>未登录</span>
         </div>
         <div class="row" @click="tagStore.selectTag('home')" :class="{ 'row-selected': tagStore.isSelected('home') }">
-            <img class="button" src="/src/assets/images/buttons/home-page.png" />
+            <img class="button" src="/src/assets/images/buttons/home.png" />
             <span>首页</span>
         </div>
         <div v-if="userStore.isLogged" class="row" @click="tagStore.selectTag('playlist')" :class="{ 'row-selected': tagStore.isSelected('playlist') }">
-            <img class="button" src="/src/assets/images/buttons/playlist-page.png" />
+            <img class="button" src="/src/assets/images/buttons/playlist.png" />
             <span>歌单</span>
         </div>
         <div v-if="userStore.isLogged" class="row" @click="tagStore.selectTag('upload')" :class="{ 'row-selected': tagStore.isSelected('upload') }">
-            <img class="button" src="/src/assets/images/buttons/upload-page.png" />
+            <img class="button" src="/src/assets/images/buttons/upload.png" />
             <span>上传</span>
         </div>
     </div>
@@ -37,7 +37,7 @@ const userStore = useUser();
 .tag-selector-box {
     width: 25%;
     height: auto;
-    padding: 5px 10px;
+    padding: 0.25em 0.5em;
     flex-direction: column;
     transition: var(--transition-duration);
 }
@@ -51,7 +51,7 @@ const userStore = useUser();
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%); 
-    height: 75%;
+    height: 60%;
     aspect-ratio: 1;
     transition: var(--transition-duration);
 }
@@ -67,13 +67,13 @@ const userStore = useUser();
     right: 15%;
     transform: translate(0, -50%);
     opacity: 0;
-    font-size: 0.1rem;
+    font-size: 0.1em;
     transition: var(--transition-duration);
 }
 
 .tag-selector-box:hover span {
     opacity: 1;
-    font-size: 1.2rem;
+    font-size: 1em;
 }
 
 .avatar {
@@ -83,12 +83,9 @@ const userStore = useUser();
 .row {
     position: relative;
     width: 100%;
-    height: 2rem;
-    margin: 5px;
-    padding: 10px;
-    border-radius: 15px;
-    box-sizing: border-box;
-    color: white;
+    height: 2em;
+    margin: 0.25em;
+    border-radius: 1.5em;
     background-color: transparent;
     transition: var(--transition-duration);
 }
@@ -99,6 +96,6 @@ const userStore = useUser();
 }
 
 .row-selected {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--selected-background-color);
 }
 </style>

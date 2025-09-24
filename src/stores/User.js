@@ -1,11 +1,14 @@
 import { defineStore } from "pinia";
 import { computed, onMounted, ref } from "vue";
-import { userLogin, userRegister, getUser, saveUserProfile } from "/src/api/User";
-import { useMusicList } from "/src/stores/MusicList";
-import { ws } from "/src/utils/WebSocket";
+import { login, register, get, saveProfile } from "/src/api/User";
+import { useTagSelector } from "/src/stores/TagSelector";
+import { useToast } from "/src/stores/Toast";
+import { usePlaylist } from "/src/stores/Playlist";
 
 export const useUser = defineStore("User", () => {
-    const musicListStore = useMusicList();
+    const tagStore = useTagSelector();
+    const toastStore = useToast();
+    const playlistStore = usePlaylist();
 
     // 当前登录用户
     const emptyUser = () => ({
@@ -18,60 +21,54 @@ export const useUser = defineStore("User", () => {
         return user.value.id !== "";
     });
     const updateProfile = async () => {
-        if (user.value.id === "") {
+        if (!isLogged) {
             user.value = emptyUser();
+            tagStore.selectTag("home");
             return;
         }
-        const response = await getUser(user.value.id);
+        const response = await get(user.value.id);
         user.value = emptyUser();
         if (!response.success) {
+            toastStore.addMessage(response);
             console.error(response.message);
+            tagStore.selectTag("home");
             return;
         }
         user.value = { ...user.value, ...response.data.user };
-        // 加载歌单
-        musicListStore.updateStaredMusicList(user.value.id);
+        console.log("已更新个人档案");
+        // 更新用户的歌单列表
+        playlistStore.updatePlaylistList();
     };
-    ws.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "profile_updated" && data.id === user.value.id) {
-            updateProfile();
-        }
-    });
 
     // 注册、登录与退出登录
-    const register = async (nickname, password) => {
-        const response = await userRegister(nickname, password);
+    const handleResponse = (response) => {
+        toastStore.addMessage(response);
         if (!response.success) {
             console.error(response.message);
-            return response;
+            return;
         }
         user.value.id = response.data.user.id;
         updateProfile();
-        return response;
     };
-    const login = async (nickname, password) => {
-        const response = await userLogin(nickname, password);
-        if (!response.success) {
-            console.error(response.message);
-            return response;
-        }
-        user.value.id = response.data.user.id;
-        updateProfile();
-        return response;
+    const userRegister = async (nickname, password) => {
+        handleResponse(await register(nickname, password));
     };
-    const logout = () => {
+    const userLogin = async (nickname, password) => {
+        handleResponse(await login(nickname, password));
+    };
+    const userLogout = () => {
         user.value = emptyUser();
-        musicListStore.updateStaredMusicList("");
+        updateProfile();
     }
 
     // 保存档案
-    const saveProfile = async (avatarFile = null) => {
-        const response = await saveUserProfile(avatarFile, user.value);
+    const userSaveProfile = async (avatarFile = null) => {
+        const response = await saveProfile(avatarFile, user.value);
+        toastStore.addMessage(response);
         if (!response.success) {
             console.error(response.message);
         }
-        return response;
+        updateProfile();
     }
 
     // 初始化
@@ -82,11 +79,11 @@ export const useUser = defineStore("User", () => {
     return {
         user,
         isLogged,
-        register,
-        login,
-        logout,
+        userRegister,
+        userLogin,
+        userLogout,
         updateProfile,
-        saveProfile
+        userSaveProfile
     };
 }, {
     // 只缓存当前用户
