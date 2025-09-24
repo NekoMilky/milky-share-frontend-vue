@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { useRightClickMenu } from "/src/stores/RightClickMenu";
 
 const rightClickMenuStore = useRightClickMenu();
@@ -11,6 +11,30 @@ const handleClickOutside = (event) => {
         rightClickMenuStore.close();
     }
 };
+
+// 菜单位置修正
+const adjustMenuPos = async () => {
+    await nextTick(); 
+    if (!menuBox.value) { 
+        return;
+    }
+    const { x, y } = rightClickMenuStore.pos;
+    const menuWidth = menuBox.value.offsetWidth;
+    const menuHeight = menuBox.value.offsetHeight;
+    // 超出视口右侧
+    if (x + menuWidth > window.innerWidth) {
+        rightClickMenuStore.pos.x = x - menuWidth;
+    }
+    // 超出视口底部
+    if (y + menuHeight > window.innerHeight) {
+        rightClickMenuStore.pos.y = y - menuHeight;
+    }
+};
+watch(() => [rightClickMenuStore.isOpened, rightClickMenuStore.pos], () => {
+    if (rightClickMenuStore.isOpened) {
+        adjustMenuPos();
+    }
+}, { immediate: true });
 
 // 初始化
 onMounted(() => {
