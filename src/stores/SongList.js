@@ -4,10 +4,12 @@ import { isSuccessWithToast, checkEmptyField, checkEmptyFields } from "/src/util
 import { getAll, getAllByPlaylist, upload, remove } from "/src/api/Song";
 import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
+import { useMusicPlayer } from "/src/stores/MusicPlayer";
 
 export const useSongList = defineStore("SongList", () => {
     const dialogStore = useDialog();
     const userStore = useUser();
+    const musicPlayerStore = useMusicPlayer();
 
     // 总列表
     const songList = ref([]);
@@ -74,6 +76,9 @@ export const useSongList = defineStore("SongList", () => {
         const response = await remove(values.userId, values.songId);
         if (!isSuccessWithToast(response)) {
             return;
+        }
+        if (values.songId === musicPlayerStore.playingSong.id) {
+            musicPlayerStore.clearSong();
         }
         updateSongList();
     };

@@ -1,11 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { checkEmptyField } from "/src/utils/Utility";
-import { useToast } from "/src/stores/Toast";
 
 export const useDialog = defineStore("Dialog", () => {
-    const toastStore = useToast();
-
     // 加载对话框
     const rows = ref([]);
     const confirmAction = ref(null);

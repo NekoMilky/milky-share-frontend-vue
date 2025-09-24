@@ -1,12 +1,11 @@
 import { defineStore } from "pinia";
 import { ref, computed, onMounted } from "vue";
 import { get } from "/src/api/Song";
-import { useToast } from "/src/stores/Toast";
 import { useSongList } from "/src/stores/SongList";
 import { checkEmptyField } from "/src/utils/Utility";
+import { isSuccessWithToast } from "/src/utils/Utility";
 
 export const useMusicPlayer = defineStore("MusicPlayer", () => {
-    const toastStore = useToast();
     const songListStore = useSongList();
 
     // 当前播放音乐
@@ -38,16 +37,14 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
     const isLoading = ref(false);
     const loadSong = async (songId, autoPlay = true) => {
         if (!checkEmptyField(songId, "歌曲id")) {
-            return;
+            return false;
         }
         isLoading.value = true;
         const response = await get(songId);
         clearSong();
-        if (!response.success) {
-            toastStore.addMessage(response);
-            console.error(response.message);
+        if (!isSuccessWithToast(response, true)) {
             isLoading.value = false;
-            return;
+            return false;
         }
         playingSong.value = { ...playingSong.value, ...response.data.song };
         // 创建audio元素
@@ -57,6 +54,7 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
             togglePlay();
         }
         isLoading.value = false;
+        return true;
     };
     const createAudioElement = async (url) => {
         audio.value = new Audio(url);
@@ -154,10 +152,11 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         // 恢复播放进度
         if (playingSong.value.id !== "") {
             const current = currentTime.value;
-            await loadSong(playingSong.value.id, false);
-            audio.value.currentTime = current;
-            updateProgress();
-            updateCoverAnimation();
+            if (await loadSong(playingSong.value.id, false)) {
+                audio.value.currentTime = current;
+                updateProgress();
+                updateCoverAnimation();
+            }
         }
     });
 
@@ -171,6 +170,7 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         progress,
         coverRotation,
         loadSong,
+        clearSong,
         togglePlay,
         switchPlay,
         setCurrentTime
