@@ -23,7 +23,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="playlist scrollbar-column">
+    <div class="playlist">
         <div class="playlist-label">
             {{ props.label }}
             <img 
@@ -53,8 +53,6 @@ const props = defineProps({
 .playlist {
     width: 100%;
     height: 45%;
-    overflow-x: hidden;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -94,6 +92,8 @@ const props = defineProps({
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .playlist-list-empty {
