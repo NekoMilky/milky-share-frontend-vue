@@ -1,12 +1,11 @@
 import { defineStore } from "pinia";
 import { ref, onMounted } from "vue";
+import { isSuccessWithToast, checkEmptyField, checkEmptyFields } from "/src/utils/Utility";
 import { getAll, getAllByPlaylist, upload, remove } from "/src/api/Song";
-import { useToast } from "/src/stores/Toast";
 import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
 
 export const useSongList = defineStore("SongList", () => {
-    const toastStore = useToast();
     const dialogStore = useDialog();
     const userStore = useUser();
 
@@ -14,9 +13,7 @@ export const useSongList = defineStore("SongList", () => {
     const songList = ref([]);
     const updateSongList = async () => {
         const response = await getAll();
-        if (!response.success) {
-            toastStore.addMessage(response);
-            console.error(response.message);
+        if (!isSuccessWithToast(response, true)) {
             songList.value = [];
             return;
         }
@@ -27,13 +24,11 @@ export const useSongList = defineStore("SongList", () => {
     // 当前查看歌单的歌曲列表
     const viewingSongList = ref([]);
     const updateViewingSongList = async (playlistId) => {
-        if (!playlistId || playlistId === "") {
+        if (!checkEmptyField(playlistId, "歌单id")) {
             return;
         }
         const response = await getAllByPlaylist(playlistId);
-        if (!response.success) {
-            toastStore.addMessage(response);
-            console.error(response.message);
+        if (!isSuccessWithToast(response, true)) {
             viewingSongList.value = [];
             return;
         }
@@ -43,20 +38,27 @@ export const useSongList = defineStore("SongList", () => {
 
     // 上传歌曲
     const uploadSong = async (file, info) => {
-        if (!userStore.isLogged || !file || !info) {
+        if (!userStore.isLogged) {
+            isSuccessWithToast({ message: "游客无法使用上传功能", success: false });
+            return;
+        }
+        if (!checkEmptyFields({ file, info }, { file: "音频文件", info: "歌曲元信息" })) {
             return;
         }
         const response = await upload(file, info, userStore.user.id);
-        toastStore.addMessage(response);
-        if (!response.success) {
-            console.error(response.message);
+        if (!isSuccessWithToast(response)) {
+            return;
         }
         updateSongList();
     };
 
     // 删除歌曲
     const removeSong = (songId, songTitle) => {
-        if (!userStore.isLogged || !songId || songId === "") {
+        if (!userStore.isLogged) {
+            isSuccessWithToast({ message: "游客无法删除歌曲", success: false });
+            return;
+        }
+        if (!checkEmptyField(songId, "歌曲id")) {
             return;
         }
         dialogStore.loadDialog([
@@ -70,9 +72,7 @@ export const useSongList = defineStore("SongList", () => {
     };
     const confirmRemoveSong = async (values) => {
         const response = await remove(values.userId, values.songId);
-        toastStore.addMessage(response);
-        if (!response.success) {
-            console.error(response.message);
+        if (!isSuccessWithToast(response)) {
             return;
         }
         updateSongList();

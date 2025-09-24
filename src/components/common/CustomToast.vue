@@ -33,7 +33,7 @@ const toastStore = useToast();
     height: auto;
     transform: translateX(-50%);
     max-height: 90%;
-    overflow: hidden hidden;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

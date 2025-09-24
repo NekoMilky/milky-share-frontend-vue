@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { checkEmptyField } from "/src/utils/Utility";
 import { useToast } from "/src/stores/Toast";
 
 export const useDialog = defineStore("Dialog", () => {
@@ -38,8 +39,7 @@ export const useDialog = defineStore("Dialog", () => {
     // 提交
     const submitDialog = () => {
         for (const row of rows.value) {
-            if (row.type === "input" && row.input.required && values.value[row.key] === "") {
-                toastStore.addMessage({ message: `请填写${row.input.label}`, success: false });
+            if (row.type === "input" && row.input.required && !checkEmptyField(values.value[row.key], row.input.label)) {
                 return;
             }
         }

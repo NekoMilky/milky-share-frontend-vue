@@ -23,7 +23,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="playlist">
+    <div class="playlist scrollbar-column">
         <div class="playlist-label">
             {{ props.label }}
             <img 

@@ -1,10 +1,13 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { isSuccessWithToast, checkEmptyField } from "/src/utils/Utility";
 import { getAllByUser, create } from "/src/api/Playlist";
+import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
 import { useSongList } from "/src/stores/SongList";
 
 export const usePlaylist = defineStore("Playlist", () => {
+    const dialogStore = useDialog();
     const userStore = useUser();
     const songListStore = useSongList();
 
@@ -18,8 +21,7 @@ export const usePlaylist = defineStore("Playlist", () => {
             return;
         }
         const response = await getAllByUser(userStore.user.id);
-        if (!response.success) {
-            console.error(response.message);
+        if (!isSuccessWithToast(response, true)) {
             createPlaylist.value = [];
             starPlaylist.value = [];
             return;
@@ -64,24 +66,31 @@ export const usePlaylist = defineStore("Playlist", () => {
         }
         return result || {};
     });
-    const viewPlaylist = (id) => {
-        if (!id || id === "") {
+    const viewPlaylist = (playlistId) => {
+        if (!checkEmptyField(playlistId, "歌单id")) {
             return;
         }
-        viewingPlaylistId.value = id;
+        viewingPlaylistId.value = playlistId;
         // 更新歌单的歌曲列表
         songListStore.updateViewingSongList(viewingPlaylistId.value);
     };
 
     // 创建歌单
-    const playlistCreate = async (name) => {
+    const playlistCreate = () => {
         if (!userStore.isLogged) {
+            isSuccessWithToast({ message: "游客无法创建歌单", success: false });
             return;
         }
-        const response = await create(userStore.user.id, name);
-        toastStore.addMessage(response);
-        if (!response.success) {
-            console.error(response.message);
+        dialogStore.loadDialog([
+            { key: "title", type: "text", text: "创建新歌单" },
+            { key: "playlistName", type: "input", input: { required: true, type: "text", label: "歌单名", value: "", placeholder: "请输入歌单名" } }
+        ], confirmPlaylistCreate, [
+            { key: "userId", value: userStore.user.id }
+        ]);
+    };
+    const confirmPlaylistCreate = async (values) => {
+        const response = await create(values.userId, values.playlistName);
+        if (!isSuccessWithToast(response)) {
             return;
         }
         updatePlaylistList(true);

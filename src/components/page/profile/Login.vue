@@ -1,10 +1,9 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { checkNickname } from "/src/api/User";
-import { useToast } from "/src/stores/Toast";
 import { useUser } from "/src/stores/User";
+import { isSuccessWithToast } from "/src/utils/Utility";
 
-const toastStore = useToast();
 const userStore = useUser();
 
 // 标签选择
@@ -50,7 +49,6 @@ watch(() => nickname.value, async (value) => {
     if (isTag("register") && value !== "") {
         const response = await checkNickname(value);
         isNicknameUsable.value = response.data.usable;
-        console.log(isNicknameUsable.value);
     }
 });
 const issue = computed(() => {
@@ -84,16 +82,20 @@ const issue = computed(() => {
 });
 
 // 注册与登录
-const login = () => {
+const checkIssue = () => {
     if (issue.value) {
-        toastStore.addMessage({ message: issue.value, success: false })
+        isSuccessWithToast({ message: issue.value, success: false });
+    }
+    return !issue.value;
+};
+const login = () => {
+    if (!checkIssue()) {
         return;
     }
     userStore.userLogin(nickname.value, password.value);
 }
 const register = () => {
-    if (issue.value) {
-        toastStore.addMessage({ message: issue.value, success: false })
+    if (!checkIssue()) {
         return;
     }
     userStore.userRegister(nickname.value, password.value);

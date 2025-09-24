@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { get } from "/src/api/Song";
 import { useToast } from "/src/stores/Toast";
 import { useSongList } from "/src/stores/SongList";
+import { checkEmptyField } from "/src/utils/Utility";
 
 export const useMusicPlayer = defineStore("MusicPlayer", () => {
     const toastStore = useToast();
@@ -36,7 +37,7 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
     };
     const isLoading = ref(false);
     const loadSong = async (songId, autoPlay = true) => {
-        if (!songId || songId === "") {
+        if (!checkEmptyField(songId, "歌曲id")) {
             return;
         }
         isLoading.value = true;

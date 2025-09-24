@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
 import { computed, onMounted, ref } from "vue";
+import { isSuccessWithToast } from "/src/utils/Utility";
 import { login, register, get, saveProfile } from "/src/api/User";
 import { useTagSelector } from "/src/stores/TagSelector";
-import { useToast } from "/src/stores/Toast";
 import { usePlaylist } from "/src/stores/Playlist";
+import { useDialog } from "/src/stores/Dialog";
 
 export const useUser = defineStore("User", () => {
     const tagStore = useTagSelector();
-    const toastStore = useToast();
+    const dialogStore = useDialog();
     const playlistStore = usePlaylist();
 
     // 当前登录用户
@@ -28,9 +29,7 @@ export const useUser = defineStore("User", () => {
         }
         const response = await get(user.value.id);
         user.value = emptyUser();
-        if (!response.success) {
-            toastStore.addMessage(response);
-            console.error(response.message);
+        if (!isSuccessWithToast(response, true)) {
             tagStore.selectTag("home");
             return;
         }
@@ -42,9 +41,7 @@ export const useUser = defineStore("User", () => {
 
     // 注册、登录与退出登录
     const handleResponse = (response) => {
-        toastStore.addMessage(response);
-        if (!response.success) {
-            console.error(response.message);
+        if (!isSuccessWithToast(response)) {
             return;
         }
         user.value.id = response.data.user.id;
@@ -57,19 +54,31 @@ export const useUser = defineStore("User", () => {
         handleResponse(await login(nickname, password));
     };
     const userLogout = () => {
+        dialogStore.loadDialog([
+            { key: "title", type: "text", text: "退出登录确认" }
+        ], confirmUserLogout);
+    };
+    const confirmUserLogout = () => {
         user.value = emptyUser();
-        updateProfile();
-    }
+        tagStore.selectTag("home");
+    };
 
     // 保存档案
-    const userSaveProfile = async (avatarFile = null) => {
-        const response = await saveProfile(avatarFile, user.value);
-        toastStore.addMessage(response);
-        if (!response.success) {
-            console.error(response.message);
+    const userSaveProfile = (avatarFile = null) => {
+        dialogStore.loadDialog([
+            { key: "title", type: "text", text: "保存档案确认" }
+        ], confirmUserSaveProfile, [
+            { key: "avatarFile", value: avatarFile },
+            { key: "userInfo", value: user.value }
+        ]);
+    };
+    const confirmUserSaveProfile = async (values) => {
+        const response = await saveProfile(values.avatarFile, values.userInfo);
+        if (!isSuccessWithToast(response)) {
+            return;
         }
         updateProfile();
-    }
+    };
 
     // 初始化
     onMounted(() => {

@@ -7,7 +7,7 @@ const dialogStore = useDialog();
 <template>
     <Teleport to="body">
         <div class="dialog" v-if="dialogStore.isOpened">
-            <div class="dialog-box">
+            <div class="dialog-box scrollbar-column">
                 <div
                     class="row"
                     v-for="row in dialogStore.rows"

@@ -1,13 +1,10 @@
 <script setup>
 import { ref } from "vue";
-import { useToast } from "/src/stores/Toast";
-import { useDialog } from "/src/stores/Dialog";
+import { isSuccessWithToast, checkEmptyField } from "/src/utils/Utility";
 import { useUser } from "/src/stores/User";
 
 import defaultAvatarImg from "/src/assets/images/default/avatar.png";
 
-const toastStore = useToast();
-const dialogStore = useDialog();
 const userStore = useUser();
 
 const avatarInput = ref(null);
@@ -15,7 +12,7 @@ const avatarInput = ref(null);
 // 处理头像选择
 const selectedFile = ref(null);
 const selectFiles = async (files) => {
-    if (!files || !files.length) {
+    if (!checkEmptyField(files, "头像文件")) {
         return;
     }
     const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
@@ -57,26 +54,9 @@ const fileToFile = async (file, maxSize = 256) => {
         return new File([blobCompressed], `file.${filePostfix}`, { type: format });
     }
     catch (error) {
-        const message = "无法将File对象转为File对象";
-        console.error(message, error);
-        toastStore.addMessage({ message: message, success: false });
+        isSuccessWithToast({ message: "无法将File对象转为File对象", success: false });
         return null;
     }
-};
-
-// 保存档案
-const saveProfileRows = [{ key: "title", type: "text", text: "保存档案确认" }];
-const openSaveProfile = () => {
-    dialogStore.loadDialog(saveProfileRows, submitSaveProfile);
-};
-const submitSaveProfile = async () => {
-    await userStore.userSaveProfile(selectedFile.value);
-}
-
-// 退出登录
-const logoutRows = [{ key: "title", type: "text", text: "退出登录确认" }];
-const openLogout = () => {
-    dialogStore.loadDialog(logoutRows, userStore.userLogout);
 };
 </script>
 
@@ -103,8 +83,8 @@ const openLogout = () => {
             </div>
         </div>
         <div class="button-list">
-            <div class="button" @click="openSaveProfile">保存</div>
-            <div class="button danger" @click="openLogout">退出登录</div>
+            <div class="button" @click="userStore.userSaveProfile(selectedFile)">保存</div>
+            <div class="button danger" @click="userStore.userLogout">退出登录</div>
         </div>
     </div>
 </template>

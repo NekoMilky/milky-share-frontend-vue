@@ -1,8 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { timeFormat } from "/src/utils/Utility";
-import { useToast } from "/src/stores/Toast";
-import { useUser } from "/src/stores/User";
+import { timeFormat, isSuccessWithToast, checkEmptyField, checkEmptyFields } from "/src/utils/Utility";
 import { useSongList } from "/src/stores/SongList";
 import jsmediatags from "jsmediatags/dist/jsmediatags.min";
 
@@ -10,14 +8,12 @@ import defaultCoverImg from "/src/assets/images/default/cover.png";
 
 const fileInput = ref(null);
 
-const toastStore = useToast();
-const userStore = useUser();
 const songListStore = useSongList();
 
 // 处理文件选择
 const selectedFile = ref(null);
 const selectFiles = (files) => {
-    if (!files || !files.length) {
+    if (!checkEmptyField(files, "音频文件")) {
         return;
     }
     const audioFiles = Array.from(files).filter((file) => file.type.startsWith("audio/"));
@@ -42,18 +38,13 @@ const clearSelectedFile = () => {
 // 处理文件上传
 const isUploading = ref(false);
 const uploadFile = async () => {
-    if (!selectedFile.value || !userStore.isLogged) {
+    if (!selectedFile.value) {
+        isSuccessWithToast({ message: "没有上传音频文件", success: false });
         return;
     }
-    // 处理空值
-    if (songInfo.value.title === "") {
-        songInfo.value.title = "未知标题";
-    }
-    if (songInfo.value.artist === "") {
-        songInfo.value.artist = "未知艺术家";
-    }
-    if (songInfo.value.album === "") {
-        songInfo.value.album = "未知专辑";
+    const { title, artist, album } = songInfo.value;
+    if (!checkEmptyFields({ title, artist, album }, { title: "标题", artist: "艺术家", album: "专辑" })) {
+        return;
     }
     // 开始上传
     isUploading.value = true;
@@ -74,6 +65,7 @@ const emptySongInfo = () => ({
 const songInfo = ref(emptySongInfo());
 const updateSongInfo = () => {
     if (!selectedFile.value) {
+        isSuccessWithToast({ message: "没有上传音频文件", success: false });
         return;
     }
     songInfo.value = emptySongInfo();
@@ -89,9 +81,7 @@ const updateSongInfo = () => {
             }
         },
         onError: (error) => {
-            const message = "加载歌曲元数据时出错";
-            toastStore.addMessage({ message: message, success: false });
-            console.error(message, error);
+            isSuccessWithToast({ message: "解析音频文件元数据时出错", success: false, error: error });
         }
     });
     // 解析时长
@@ -114,9 +104,7 @@ const objectToURI = (object) => {
         return `data:${object.format};base64,${base64}`;
     }
     catch (error) {
-        const message = "无法将对象转为URI";
-        toastStore.addMessage({ message: message, success: false });
-        console.error(message, error);
+        isSuccessWithToast({ message: "无法将对象转为URI", success: false, error: error });
         return null;
     }
 };
@@ -154,9 +142,7 @@ const objectToFile = async (object, maxSize = 256) => {
         return new File([blobCompressed], `file.${filePostfix}`, { type: format });
     }
     catch (error) {
-        const message = "无法将对象转为File对象";
-        toastStore.addMessage({ message: message, success: false });
-        console.error(message, error);
+        isSuccessWithToast({ message: "无法将对象转为File对象", success: false, error: error });
         return null;
     }
 };
