@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, onMounted } from "vue";
-import { getAll, getAllByPlaylist, remove } from "/src/api/Song";
+import { getAll, getAllByPlaylist, upload, remove } from "/src/api/Song";
 import { useToast } from "/src/stores/Toast";
 import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
@@ -41,6 +41,19 @@ export const useSongList = defineStore("SongList", () => {
         console.log("已更新歌单的歌曲列表");
     };
 
+    // 上传歌曲
+    const uploadSong = async (file, info) => {
+        if (!userStore.isLogged || !file || !info) {
+            return;
+        }
+        const response = await upload(file, info, userStore.user.id);
+        toastStore.addMessage(response);
+        if (!response.success) {
+            console.error(response.message);
+        }
+        updateSongList();
+    };
+
     // 删除歌曲
     const removeSong = (songId, songTitle) => {
         if (!userStore.isLogged || !songId || songId === "") {
@@ -74,6 +87,7 @@ export const useSongList = defineStore("SongList", () => {
         songList,
         viewingSongList,
         updateViewingSongList,
+        uploadSong,
         removeSong
     };
 });

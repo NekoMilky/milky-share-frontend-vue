@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from "vue";
 import { timeFormat } from "/src/utils/Utility";
-import { upload } from "/src/api/Song";
 import { useToast } from "/src/stores/Toast";
 import { useUser } from "/src/stores/User";
+import { useSongList } from "/src/stores/SongList";
 import jsmediatags from "jsmediatags/dist/jsmediatags.min";
 
 import defaultCoverImg from "/src/assets/images/default/cover.png";
@@ -12,6 +12,7 @@ const fileInput = ref(null);
 
 const toastStore = useToast();
 const userStore = useUser();
+const songListStore = useSongList();
 
 // 处理文件选择
 const selectedFile = ref(null);
@@ -56,11 +57,7 @@ const uploadFile = async () => {
     }
     // 开始上传
     isUploading.value = true;
-    const response = await upload(selectedFile.value, songInfo.value, userStore.user.id);
-    toastStore.addMessage(response);
-    if (!response.success) {
-        console.error(response.message);
-    }
+    await songListStore.uploadSong(selectedFile.value, songInfo.value);
     // 上传结束
     clearSelectedFile();
 };
