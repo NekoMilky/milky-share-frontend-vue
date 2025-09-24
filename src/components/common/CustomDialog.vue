@@ -12,6 +12,7 @@ const dialogStore = useDialog();
                     class="row"
                     v-for="row in dialogStore.rows"
                     :key="row.key"
+                    :class="{ 'danger': row.danger }"
                 >
                     <template v-if="row.type === 'text'">{{ row.text }}</template>
                     <template v-if="row.type === 'input'">
@@ -145,5 +146,9 @@ const dialogStore = useDialog();
     height: 60%;
     aspect-ratio: 1;
     margin-right: 0.5em;
+}
+
+.danger {
+    color: var(--danger-color);
 }
 </style>

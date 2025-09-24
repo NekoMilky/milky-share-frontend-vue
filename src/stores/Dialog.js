@@ -9,7 +9,7 @@ export const useDialog = defineStore("Dialog", () => {
     const rows = ref([]);
     const confirmAction = ref(null);
     const values = ref({});
-    const loadDialog = (rowsVal, confirmAct = null) => {
+    const loadDialog = (rowsVal, confirmAct = null, valList = []) => {
         values.value = {};
         rows.value = rowsVal;
         confirmAction.value = confirmAct;
@@ -18,6 +18,9 @@ export const useDialog = defineStore("Dialog", () => {
             if (row.type === "input") {
                 values.value[row.key] = row.input.value;
             }
+        });
+        valList.forEach((val) => {
+            values.value[val.key] = val.value;
         });
         // 打开对话
         open();

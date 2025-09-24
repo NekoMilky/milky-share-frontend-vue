@@ -31,3 +31,11 @@ export const getAllByPlaylist = async (playlistId) => {
     const response = await sendPost("song/get_all_by_playlist", formData, {});
     return response;
 };
+
+export const remove = async (userId, songId) => {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("songId", songId);
+    const response = await sendPost("song/remove", formData, {});
+    return response;
+};

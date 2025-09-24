@@ -1,10 +1,14 @@
 import { defineStore } from "pinia";
 import { ref, onMounted } from "vue";
-import { getAll, getAllByPlaylist } from "/src/api/Song";
+import { getAll, getAllByPlaylist, remove } from "/src/api/Song";
 import { useToast } from "/src/stores/Toast";
+import { useDialog } from "/src/stores/Dialog";
+import { useUser } from "/src/stores/User";
 
 export const useSongList = defineStore("SongList", () => {
     const toastStore = useToast();
+    const dialogStore = useDialog();
+    const userStore = useUser();
 
     // 总列表
     const songList = ref([]);
@@ -37,6 +41,30 @@ export const useSongList = defineStore("SongList", () => {
         console.log("已更新歌单的歌曲列表");
     };
 
+    // 删除歌曲
+    const removeSong = (songId, songTitle) => {
+        if (!userStore.isLogged || !songId || songId === "") {
+            return;
+        }
+        dialogStore.loadDialog([
+            { key: "title", type: "text", text: "删除歌曲确认" },
+            { key: "confirm", type: "text", text: `你确定要删除歌曲“${songTitle}”吗？` },
+            { key: "mayCauseIssue", type: "text", text: "此操作无法恢复！", danger: true }
+        ], confirmRemoveSong, [
+            { key: "userId", value: userStore.user.id },
+            { key: "songId", value: songId }
+        ]);
+    };
+    const confirmRemoveSong = async (values) => {
+        const response = await remove(values.userId, values.songId);
+        toastStore.addMessage(response);
+        if (!response.success) {
+            console.error(response.message);
+            return;
+        }
+        updateSongList();
+    };
+
     // 初始化
     onMounted(() => {
         updateSongList();
@@ -45,6 +73,7 @@ export const useSongList = defineStore("SongList", () => {
     return {
         songList,
         viewingSongList,
-        updateViewingSongList
+        updateViewingSongList,
+        removeSong
     };
 });

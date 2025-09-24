@@ -20,6 +20,7 @@ import pauseCircleImg from "/src/assets/images/buttons-circle/pause.png";
 const rightClickMenuStore = useRightClickMenu();
 const userStore = useUser();
 const musicPlayerStore = useMusicPlayer();
+const songListStore = useSongList();
 
 const songListHeader = ref(null);
 const getSongListHeaderWidth = () => {
@@ -150,7 +151,7 @@ const handleRightMenu = (event, song) => {
             key: "deleteSong", 
             label: "删除歌曲", 
             iconSrc: deleteImg, 
-            onClick: () => {}, 
+            onClick: () => songListStore.removeSong(song.id, song.title), 
             danger: true 
         });
     }
