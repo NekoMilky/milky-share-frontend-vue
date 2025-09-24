@@ -136,7 +136,7 @@ const handleRightMenu = (event, song) => {
         key: "togglePlay", 
         label: shouldShowPause ? "暂停" : "播放",
         iconSrc: shouldShowPause ? pauseImg : playImg,
-        onClick: isPlayingThis ? () => musicPlayerStore.togglePlay : () => musicPlayerStore.loadSong(song.id)
+        onClick: () => (isPlayingThis ? musicPlayerStore.togglePlay() : musicPlayerStore.loadSong(song.id))
     });
     // 下载
     menu.push({
