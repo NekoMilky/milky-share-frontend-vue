@@ -61,7 +61,7 @@ const fileToFile = async (file, maxSize = 256) => {
 </script>
 
 <template>
-    <div class="box profile-box">
+    <div class="container">
         <div class="profile">
             <img 
                 class="avatar" 
@@ -90,8 +90,7 @@ const fileToFile = async (file, maxSize = 256) => {
 </template>
 
 <style scoped>
-.profile-box {
-    height: 50%;
+.container {
     flex-direction: column;
 }
 

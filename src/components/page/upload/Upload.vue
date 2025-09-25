@@ -149,7 +149,7 @@ const objectToFile = async (object, maxSize = 256) => {
 </script>
 
 <template>
-    <div class="box song-upload-box">
+    <div class="container">
         <div 
             v-if="!selectedFile" 
             class="upload-area" 
@@ -215,8 +215,7 @@ const objectToFile = async (object, maxSize = 256) => {
 </template>
 
 <style scoped>
-.song-upload-box {
-    height: 50%;
+.container {
     flex-direction: column;
 }
 

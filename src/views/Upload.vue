@@ -5,8 +5,8 @@ import Upload from "/src/components/page/upload/Upload.vue";
 
 <template>
     <div class="page">
-        <MusicPlayer />
-        <Upload />
+        <MusicPlayer class="box" style="height: 20%;" />
+        <Upload class="box" style="height: 50%;" />
     </div>
 </template>
 

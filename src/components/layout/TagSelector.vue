@@ -9,7 +9,7 @@ const userStore = useUser();
 </script>
 
 <template>
-    <div class="box tag-selector-box">
+    <div class="container">
         <div class="row" @click="tagStore.selectTag('profile')" :class="{ 'row-selected': tagStore.isSelected('profile') }">
             <img 
                 class="button avatar"
@@ -34,19 +34,18 @@ const userStore = useUser();
 </template>
 
 <style scoped>
-.tag-selector-box {
+.container {
     width: 25%;
     height: auto;
-    padding: 0.25em 0.5em;
     flex-direction: column;
     transition: var(--transition-duration);
 }
 
-.tag-selector-box:hover {
+.container:hover {
     width: 50%;
 }
 
-.tag-selector-box .button {
+.container .button {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -56,12 +55,12 @@ const userStore = useUser();
     transition: var(--transition-duration);
 }
 
-.tag-selector-box:hover .button {
+.container:hover .button {
     left: 15%;
     transform: translate(0, -50%);
 }
 
-.tag-selector-box span {
+.container span {
     position: absolute;
     top: 50%;
     right: 15%;
@@ -71,7 +70,7 @@ const userStore = useUser();
     transition: var(--transition-duration);
 }
 
-.tag-selector-box:hover span {
+.container:hover span {
     opacity: 1;
     font-size: 1em;
 }

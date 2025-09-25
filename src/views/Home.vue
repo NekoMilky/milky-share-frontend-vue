@@ -5,8 +5,8 @@ import SongList from "/src/components/common/SongList.vue";
 
 <template>
     <div class="page">
-        <MusicPlayer />
-        <SongList />
+        <MusicPlayer class="box" style="height: 20%;" />
+        <SongList class="box" style="height: 75%;" />
     </div>
 </template>
 

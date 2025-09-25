@@ -9,9 +9,9 @@ const userStore = useUser();
 
 <template>
     <div class="page">
-        <MusicPlayer />
-        <Profile v-if="userStore.isLogged" />
-        <Login v-else />
+        <MusicPlayer class="box" style="height: 20%;" />
+        <Profile v-if="userStore.isLogged" class="box" style="height: 50%;" />
+        <Login v-else class="box" style="height: 50%;" />
     </div>
 </template>
 

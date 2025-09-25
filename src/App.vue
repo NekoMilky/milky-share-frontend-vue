@@ -19,7 +19,7 @@ const tagStore = useTagSelector();
         <CustomToast />
         <RightClickMenu />
         <div class="column column-tag">
-            <TagSelector />
+            <TagSelector class="box" />
         </div>
         <div class="column column-page">
             <Home v-if="tagStore.isSelected('home')" />

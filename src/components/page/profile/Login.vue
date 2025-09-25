@@ -103,7 +103,7 @@ const register = () => {
 </script>
 
 <template>
-    <div class="box login-box">
+    <div class="container">
         <div class="input-area">
             <input 
                 v-model="nickname"
@@ -144,8 +144,7 @@ const register = () => {
 </template>
 
 <style scoped>
-.login-box {
-    height: 50%;
+.container {
     flex-direction: column;
 }
 

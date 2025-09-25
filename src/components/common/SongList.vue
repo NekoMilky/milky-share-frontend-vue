@@ -269,7 +269,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="box song-list-box">
+    <div class="container">
         <!--搜索音乐-->
         <input v-model="searchQuery" class="search-bar" type="text" placeholder="搜索标题、艺术家或专辑" />
         <!--音乐列表-->
@@ -367,8 +367,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.song-list-box {
-    height: 75%;
+.container {
     flex-direction: column;
 }
 

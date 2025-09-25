@@ -10,29 +10,29 @@ const columns = [
     { key: "album", label: "专辑", sortable: true, width: 25 },
     { key: "duration", label: "时长", sortable: true, width: 15 }
 ];
-const list = () => {
+const getList = () => {
     return useSongList().viewingSongList;
 };
 </script>
 
 <template>
     <div class="page">
-        <MusicPlayer />
-        <div class="list">
-            <Selector style="width: 20%; height: 100%;" />
-            <SongList :columns="columns" :list="list" style="width: 75%; height: 100%;" />
+        <MusicPlayer class="box" style="height: 20%;" />
+        <div class="sub-row">
+            <Selector class="box" style="width: 20%;" />
+            <SongList class="box" style="width: 75%;" :columns="columns" :list="getList" />
         </div>
     </div>
 </template>
 
 <style scoped>
-.list {
+.sub-row {
     width: 100%;
     height: 75%;
     margin: 0.25em;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
 }
 </style>

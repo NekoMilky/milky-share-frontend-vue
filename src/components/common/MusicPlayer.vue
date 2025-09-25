@@ -63,7 +63,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="box music-player-box">
+    <div class="container">
         <!--播放器主体-->
         <div class="basic">
             <div class="column column-music-cover">
@@ -124,8 +124,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.music-player-box {
-    height: 20%;
+.container {
     flex-direction: column;
 
     --progress-track-border-radius: 10px;

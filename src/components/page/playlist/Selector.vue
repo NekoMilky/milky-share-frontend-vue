@@ -27,24 +27,28 @@ const finalStarPlaylist = computed(() => {
 </script>
 
 <template>
-    <div class="box playlist-selector-box">
+    <div class="container">
         <!--搜索歌单-->
-        <input v-model="searchQuery" class="search-bar" type="text" placeholder="搜索歌单" />
+        <input v-model="searchQuery" class="search-bar" style="height: 8%;" type="text" placeholder="搜索歌单" />
         <!--创建的歌单-->
-        <Playlist :label="'创建的歌单'" :list="finalCreatePlaylist" :button="{ src: addImg, onClick: playlistStore.playlistCreate }" />
+        <Playlist 
+            style="width: 100%; height: 45%;" 
+            :label="'创建的歌单'" 
+            :list="finalCreatePlaylist" 
+            :button="{ src: addImg, onClick: playlistStore.playlistCreate }" 
+        />
         <!--收藏的歌单-->
-        <Playlist :label="'收藏的歌单'" :list="finalStarPlaylist" />
+        <Playlist 
+            style="width: 100%; height: 45%;" 
+            :label="'收藏的歌单'" 
+            :list="finalStarPlaylist" 
+        />
     </div>
 </template>
 
 <style scoped>
-.playlist-selector-box {
-    height: 75%;
+.container {
     flex-direction: column;
     font-size: 1rem;
-}
-
-.search-bar {
-    height: 8%;
 }
 </style>

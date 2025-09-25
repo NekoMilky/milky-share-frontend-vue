@@ -23,7 +23,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="playlist">
+    <div class="container">
         <div class="playlist-label">
             {{ props.label }}
             <img 
@@ -50,9 +50,7 @@ const props = defineProps({
 </template>
 
 <style scoped>
-.playlist {
-    width: 100%;
-    height: 45%;
+.container {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
