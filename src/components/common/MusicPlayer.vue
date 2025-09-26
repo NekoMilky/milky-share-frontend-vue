@@ -125,8 +125,6 @@ onMounted(() => {
 
 <style scoped>
 .container {
-    flex-direction: column;
-
     --progress-track-border-radius: 10px;
 }
 

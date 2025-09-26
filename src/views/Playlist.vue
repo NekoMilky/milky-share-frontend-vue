@@ -3,6 +3,7 @@ import { useSongList } from "/src/stores/SongList";
 import MusicPlayer from "/src/components/common/MusicPlayer.vue";
 import SongList from "/src/components/common/SongList.vue";
 import Selector from "/src/components/page/playlist/Selector.vue";
+import PlaylistInfo from "/src/components/page/playlist/PlaylistInfo.vue";
 
 const columns = [
     { key: "index", label: "#", sortable: false, width: 10 },
@@ -20,7 +21,10 @@ const getList = () => {
         <MusicPlayer class="box" style="height: 20%;" />
         <div class="sub-row">
             <Selector class="box" style="width: 20%;" />
-            <SongList class="box" style="width: 75%;" :columns="columns" :list="getList" />
+            <div class="box sub-column">
+                <PlaylistInfo style="height: 20%;" />
+                <SongList style="height: 75%;" :columns="columns" :list="getList" />
+            </div>
         </div>
     </div>
 </template>
@@ -33,6 +37,15 @@ const getList = () => {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
+}
+
+.sub-column {
+    width: 75%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     align-items: center;
 }
 </style>

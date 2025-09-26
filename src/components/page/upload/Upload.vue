@@ -86,8 +86,7 @@ const updateSongInfo = () => {
     });
     // 解析时长
     const fileUrl = URL.createObjectURL(selectedFile.value);
-    const audioElement = document.createElement("audio");
-    audioElement.src = fileUrl;
+    const audioElement = new Audio(fileUrl);
     audioElement.addEventListener("loadedmetadata", () => {
         songInfo.value.duration = audioElement.duration;
         URL.revokeObjectURL(fileUrl);
@@ -174,32 +173,32 @@ const objectToFile = async (object, maxSize = 256) => {
                         <div class="info-text">标题</div>
                         <input 
                             v-model="songInfo.title" 
-                            class="info-value info-input" 
+                            class="input-frame" 
                             type="text" 
-                            placeholder="未知标题" 
+                            placeholder="请输入标题" 
                         />
                     </div>
                     <div class="info">
                         <div class="info-text">艺术家</div>
                         <input 
                             v-model="songInfo.artist" 
-                            class="info-value info-input" 
+                            class="input-frame" 
                             type="text" 
-                            placeholder="未知艺术家" 
+                            placeholder="请输入艺术家" 
                         />
                     </div>
                     <div class="info">
                         <div class="info-text">专辑</div>
                         <input 
                             v-model="songInfo.album" 
-                            class="info-value info-input" 
+                            class="input-frame" 
                             type="text" 
-                            placeholder="未知专辑" 
+                            placeholder="请输入专辑" 
                         />
                     </div>
                     <div class="info">
                         <div class="info-text">时长</div>
-                        <div class="info-value">{{ timeFormat(songInfo.duration) }}</div>
+                        <div class="input-frame">{{ timeFormat(songInfo.duration) }}</div>
                     </div>
                 </div>
             </div>
@@ -215,10 +214,6 @@ const objectToFile = async (object, maxSize = 256) => {
 </template>
 
 <style scoped>
-.container {
-    flex-direction: column;
-}
-
 .upload-area {
     width: 100%;
     height: 100%;
@@ -296,38 +291,8 @@ const objectToFile = async (object, maxSize = 256) => {
     align-items: center;
 }
 
-.info-value {
+.input-frame {
     width: 75%;
-    height: 100%;
-    padding: 0 1em;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    border-radius: 1em;
-    background-color: transparent;
-    transition: var(--transition-duration);
-}
-
-.info-value:not(.info-input:focus):hover {
-    background-color: var(--hovered-background-color);
-}
-
-.info-input {
-    border: none;
-    outline: none;
-    color: white;
-    font-family: "Aa小迷糊少女";
-    font-size: 1em;
-}
-
-.info-input:focus {
-    background-color: var(--selected-background-color);
-}
-
-.info-input::placeholder {
-    color: rgb(192, 192, 192);
 }
 
 .button-list {

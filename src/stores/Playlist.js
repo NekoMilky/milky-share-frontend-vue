@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import { isSuccessWithToast, checkEmptyField } from "/src/utils/Utility";
-import { getAllByUser, create } from "/src/api/Playlist";
+import { ref, computed, watch } from "vue";
+import { isSuccessWithToast, checkEmptyField, hasObjectChanges } from "/src/utils/Utility";
+import { getAllByUser, create, saveInfo } from "/src/api/Playlist";
 import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
-import { useSongList } from "/src/stores/SongList";
+import { useSongList } from "./SongList";
 
 export const usePlaylist = defineStore("Playlist", () => {
     const dialogStore = useDialog();
@@ -14,7 +14,7 @@ export const usePlaylist = defineStore("Playlist", () => {
     // 当前用户歌单总列表
     const createPlaylist = ref([]);
     const starPlaylist = ref([]);
-    const updatePlaylistList = async (viewLastCreated = false) => {
+    const updatePlaylistList = async (viewId = null) => {
         if (!userStore.isLogged) {
             createPlaylist.value = [];
             starPlaylist.value = [];
@@ -29,42 +29,49 @@ export const usePlaylist = defineStore("Playlist", () => {
         createPlaylist.value = response.data.createPlaylists;
         starPlaylist.value = response.data.starPlaylists;
         console.log("已更新用户的歌单列表");
-        // 切换正在查看的歌单
-        const createLen = createPlaylist.value.length;
-        const starLen = starPlaylist.value.length;
-        viewingPlaylistId.value = "";
-        if (viewLastCreated) {
+        // 切换查看的歌单
+        viewingPlaylistId.value = viewId || viewingPlaylistId.value;
+        if (viewingPlaylistId.value === "") {
+            const createLen = createPlaylist.value.length;
+            const starLen = starPlaylist.value.length;
             if (createLen > 0) {
-                viewPlaylist(createPlaylist.value[createLen - 1].id);
+                viewPlaylist(createPlaylist.value[0].id);
+                return;
+            }
+            if (starLen > 0) {
+                viewPlaylist(starPlaylist.value[0].id);
             }
         }
-        else if (createLen > 0) {
-            viewPlaylist(createPlaylist.value[0].id);
-        }
-        else if (starLen > 0) {
-            viewPlaylist(starPlaylist.value[0].id);
-        }
-    }
+    };
 
     // 当前查看的歌单
+    const emptyPlaylist = () => ({
+        id: "",
+        name: "",
+        cover: null,
+        create_time: "",
+        create_user: {
+            id: "",
+            nickname: "",
+            avatar: null
+        }
+    });
     const viewingPlaylistId = ref("");
+    const viewingPlaylistOrigin = ref({});
     const viewingPlaylist = computed(() => {
-        if (viewingPlaylistId.value === "") {
-            return {};
+        let result = createPlaylist.value.find((playlist) => playlist.id === viewingPlaylistId.value);
+        if (result) {
+            return result;
         }
-        const createLen = createPlaylist.value.length;
-        const starLen = starPlaylist.value.length;
-        let result = null;
-        if (createLen > 0) {
-            result = createPlaylist.value.find((playlist) => playlist.id === viewingPlaylistId.value);
-            if (result) {
-                return result;
-            }
-        }
-        if (starLen > 0) {
-            result = starPlaylist.value.find((playlist) => playlist.id === viewingPlaylistId.value);
-        }
-        return result || {};
+        result = starPlaylist.value.find((playlist) => playlist.id === viewingPlaylistId.value);
+        return result || emptyPlaylist();
+    });
+    watch(() => viewingPlaylistId.value, () => {
+        const playlist = viewingPlaylist.value;
+        viewingPlaylistOrigin.value = { name: playlist.name };
+    });
+    const isViewingPlaylistEditable = computed(() => {
+        return viewingPlaylist.value.create_user.id === userStore.user.id;
     });
     const viewPlaylist = (playlistId) => {
         if (!checkEmptyField(playlistId, "歌单id")) {
@@ -72,7 +79,7 @@ export const usePlaylist = defineStore("Playlist", () => {
         }
         viewingPlaylistId.value = playlistId;
         // 更新歌单的歌曲列表
-        songListStore.updateViewingSongList(viewingPlaylistId.value);
+        songListStore.updateViewingSongList(playlistId);
     };
 
     // 创建歌单
@@ -93,15 +100,41 @@ export const usePlaylist = defineStore("Playlist", () => {
         if (!isSuccessWithToast(response)) {
             return;
         }
-        updatePlaylistList(true);
+        updatePlaylistList(response.data.playlist.id);
+    };
+
+    // 保存当前查看歌单的信息，包含状态锁 
+    const isSavingInfo = ref(false);
+    const saveViewingPlaylistInfo = async (coverFile = null) => {
+        if (isSavingInfo.value) {
+            return;
+        }
+        if (!checkEmptyField(viewingPlaylist.value.id, "正在查看的歌单id")) {
+            return;
+        }
+        console.log(!coverFile);
+        if (!coverFile && !hasObjectChanges(viewingPlaylistOrigin.value, viewingPlaylist.value)) {
+            return;
+        }
+        // 开始保存
+        isSavingInfo.value = true;
+        const response = await saveInfo(coverFile, viewingPlaylist.value);
+        isSavingInfo.value = false;
+        if (!isSuccessWithToast(response)) {
+            return;
+        }
+        updatePlaylistList();
     };
 
     return {
         createPlaylist,
         starPlaylist,
+        viewingPlaylistId,
         viewingPlaylist,
+        isViewingPlaylistEditable,
         updatePlaylistList,
         viewPlaylist,
-        playlistCreate
+        playlistCreate,
+        saveViewingPlaylistInfo
     };
 });

@@ -1,6 +1,8 @@
 <script setup>
 import { usePlaylist } from "/src/stores/Playlist";
 
+import defaultCoverImg from "/src/assets/images/default/cover.png";
+
 const playlistStore = usePlaylist();
 
 const props = defineProps({
@@ -42,6 +44,7 @@ const props = defineProps({
                 :key="index"
                 @click="playlistStore.viewPlaylist(playlist.id)"
             >
+                <img class="cover" :src="playlist.cover || defaultCoverImg" />
                 {{ playlist.name }}
             </div>
         </div>
@@ -51,10 +54,8 @@ const props = defineProps({
 
 <style scoped>
 .container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 1em;
 }
 
 .playlist-label {
@@ -105,12 +106,13 @@ const props = defineProps({
 
 .playlist-item {
     width: 90%;
+    height: auto;
     box-sizing: border-box;
     padding: 0.5em;
     border-radius: 1em;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: flex-start;
     align-items: center;
     background-color: transparent;
     transition: var(--transition-duration);
@@ -123,5 +125,12 @@ const props = defineProps({
 
 .item-selected {
     background-color: var(--selected-background-color);
+}
+
+.cover {
+    height: 2em;
+    aspect-ratio: 1;
+    margin-right: 0.5em;
+    border-radius: 50%;
 }
 </style>

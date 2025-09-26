@@ -3,8 +3,8 @@ import { computed, onMounted, ref } from "vue";
 import { isSuccessWithToast } from "/src/utils/Utility";
 import { login, register, get, saveProfile } from "/src/api/User";
 import { useTagSelector } from "/src/stores/TagSelector";
-import { usePlaylist } from "/src/stores/Playlist";
 import { useDialog } from "/src/stores/Dialog";
+import { usePlaylist } from "/src/stores/Playlist";
 
 export const useUser = defineStore("User", () => {
     const tagStore = useTagSelector();
@@ -35,7 +35,7 @@ export const useUser = defineStore("User", () => {
         }
         user.value = { ...user.value, ...response.data.user };
         console.log("已更新个人档案");
-        // 更新用户的歌单列表
+        // 更新歌单列表
         playlistStore.updatePlaylistList();
     };
 

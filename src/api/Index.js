@@ -7,7 +7,7 @@ const successResponse = (response) => {
     return {
         success: true,
         data: response.data,
-        message: response.data?.message || "请求成功"
+        message: response.data.message || "请求成功"
     };
 };
 const errorResponse = (error) => {
@@ -15,8 +15,8 @@ const errorResponse = (error) => {
     if (error.response) {
         return {
             success: false,
-            error: error.response.data,
-            message: error.response.data?.message || "请求失败"
+            error: error.response.data.error,
+            message: error.response.data.message || "请求失败"
         };
     }
     // 没有收到响应
@@ -31,7 +31,7 @@ const errorResponse = (error) => {
     else {
         return {
             success: false,
-            error: error.message,
+            error: error,
             message: "请求错误"
         };
     }

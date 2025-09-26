@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
-import { isSuccessWithToast, checkEmptyField } from "/src/utils/Utility";
+import { checkEmptyField } from "/src/utils/Utility";
+import { compressImage } from "/src/utils/Convert";
 import { useUser } from "/src/stores/User";
 
 import defaultAvatarImg from "/src/assets/images/default/avatar.png";
@@ -19,44 +20,8 @@ const selectFiles = async (files) => {
     if (imageFiles.length === 0) {
         return;
     }
-    selectedFile.value = await fileToFile(imageFiles[0]);
+    selectedFile.value = await compressImage(imageFiles[0]);
     userStore.user.avatar = URL.createObjectURL(selectedFile.value);
-};
-const fileToFile = async (file, maxSize = 256) => {
-    try {
-        // 读取格式
-        const format = file.type || "image/jpeg";
-        // 转为image
-        const imgUrl = URL.createObjectURL(file);
-        const img = await new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onload = () => resolve(image);
-            image.onerror = reject;
-            image.src = imgUrl;
-        });
-        // 用canvas压缩
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        let { width, height } = img;
-        const scale = Math.min(maxSize / width, maxSize / height);
-        if (scale < 1) {
-            width = Math.round(width * scale);
-            height = Math.round(height * scale);
-        }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        // 转为blob
-        const blobCompressed = await new Promise((resolve) =>
-            canvas.toBlob(resolve, format, 0.5)
-        );
-        const filePostfix = format.split("/")[1] || "jpeg";
-        return new File([blobCompressed], `file.${filePostfix}`, { type: format });
-    }
-    catch (error) {
-        isSuccessWithToast({ message: "无法将File对象转为File对象", success: false });
-        return null;
-    }
 };
 </script>
 
@@ -78,7 +43,12 @@ const fileToFile = async (file, maxSize = 256) => {
             <div class="info-list">
                 <div class="info">
                     <div class="info-text">昵称</div>
-                    <input v-model="userStore.user.nickname" class="info-input" type="text" placeholder="请输入昵称" />
+                    <input 
+                        v-model="userStore.user.nickname" 
+                        class="input-frame" 
+                        type="text" 
+                        placeholder="请输入昵称" 
+                    />
                 </div>
             </div>
         </div>
@@ -90,10 +60,6 @@ const fileToFile = async (file, maxSize = 256) => {
 </template>
 
 <style scoped>
-.container {
-    flex-direction: column;
-}
-
 .profile {
     width: 100%;
     height: 75%;
@@ -150,25 +116,8 @@ const fileToFile = async (file, maxSize = 256) => {
     align-items: center;
 }
 
-.info-input {
+.input-frame {
     width: 75%;
-    padding: 0.5em 1em;
-    border: none;
-    outline: none;
-    border-radius: 1em;
-    background-color: transparent;
-    color: white;
-    font-family: "Aa小迷糊少女";
-    font-size: 1em;
-    transition: var(--transition-duration);
-}
-
-.info-input:hover, .info-input.focus {
-    background-color: var(--hovered-background-color);
-}
-
-.info-input::placeholder {
-    color: rgb(192, 192, 192);
 }
 
 .button {

@@ -271,7 +271,7 @@ onMounted(() => {
 <template>
     <div class="container">
         <!--搜索音乐-->
-        <input v-model="searchQuery" class="search-bar" type="text" placeholder="搜索标题、艺术家或专辑" />
+        <input v-model="searchQuery" class="input-frame with-icon" type="text" placeholder="搜索标题、艺术家或专辑" />
         <!--音乐列表-->
         <div class="song-list">
             <!--表头-->
@@ -367,12 +367,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.container {
-    flex-direction: column;
-}
-
-.search-bar {
+.input-frame {
+    width: 90%;
     height: 8%;
+    background-image: url("/src/assets/images/buttons/search.png");
 }
 
 .song-list {

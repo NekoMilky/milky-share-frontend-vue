@@ -21,7 +21,7 @@ const dialogStore = useDialog();
                             <input 
                                 v-model="dialogStore.values[row.key]" 
                                 type="text"
-                                class="text-input" 
+                                class="input-frame" 
                                 :placeholder="row.input.placeholder"
                             />
                         </template>
@@ -74,7 +74,7 @@ const dialogStore = useDialog();
     border-radius: 1.5em;
     padding: 0.5em;
     background-color: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(5px);
     font-family: "Aa小迷糊少女";
     font-size: 1.2rem;
     color: white;
@@ -104,31 +104,8 @@ const dialogStore = useDialog();
     align-items: center;
 }
 
-.text-input {
+.input-frame {
     width: 75%;
-    height: 100%;
-    padding: 0 1em;
-    box-sizing: border-box;
-    border: none;
-    outline: none;
-    border-radius: 1em;
-    background-color: transparent;
-    color: white;
-    font-family: "Aa小迷糊少女";
-    font-size: 1em;
-    transition: var(--transition-duration);
-}
-
-.text-input:not(.text-input:focus):hover {
-    background-color: var(--hovered-background-color);
-}
-
-.text-input:focus {
-    background-color: var(--selected-background-color);
-}
-
-.text-input::placeholder {
-    color: rgb(192, 192, 192);
 }
 
 .button {

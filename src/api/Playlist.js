@@ -22,3 +22,12 @@ export const getAllByUser = async (userId) => {
     const response = await sendPost("playlist/get_all_by_user", formData, {});
     return response;
 };
+
+export const saveInfo = async (coverFile, playlistInfo) => {
+    const formData = new FormData();
+    formData.append("cover", coverFile);
+    formData.append("playlistId", playlistInfo.id);
+    formData.append("name", playlistInfo.name);
+    const response = await sendPost("playlist/save_info", formData, {});
+    return response;
+};

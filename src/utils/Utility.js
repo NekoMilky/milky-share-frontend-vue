@@ -2,9 +2,18 @@ import { useToast } from "/src/stores/Toast";
 
 // 时间格式化
 export const timeFormat = (seconds) => {
-    const minute = Math.floor(seconds / 60);
-    const second = Math.floor(seconds % 60);
-    return `${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+    const minute = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const second = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${minute}:${second}`;
+};
+
+// 日期格式化
+export const dateFormat = (d) => {
+    const date = new Date(d);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
 };
 
 // 操作反馈
@@ -38,4 +47,14 @@ export const checkEmptyFields = (fields, labels = null) => {
         }
     }
     return true;
+};
+
+// 判断目标对象在原对象上相应的值是否发生改变
+export const hasObjectChanges = (origin, target, ignoreKeys = {}) => {
+    return Object.keys(origin).some((key) => {
+        if (ignoreKeys[key]) {
+            return false;
+        }
+        return origin[key] !== target[key];
+    });
 };

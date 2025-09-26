@@ -107,20 +107,20 @@ const register = () => {
         <div class="input-area">
             <input 
                 v-model="nickname"
-                class="info-input nick-input" 
+                class="input-frame with-icon nick-input" 
                 type="text" 
                 placeholder="昵称" 
             />
             <input 
                 v-model="password"
-                class="info-input password-input" 
+                class="input-frame with-icon password-input" 
                 type="password" 
                 placeholder="密码" 
             />
             <input 
                 v-model="confirmPassword"
                 v-if="isTag('register')" 
-                class="info-input confirm-input" 
+                class="input-frame with-icon confirm-input" 
                 type="password" 
                 placeholder="确认密码" 
             />
@@ -144,10 +144,6 @@ const register = () => {
 </template>
 
 <style scoped>
-.container {
-    flex-direction: column;
-}
-
 .input-area {
     width: 100%;
     height: 75%;
@@ -185,30 +181,9 @@ const register = () => {
     background-color: var(--hovered-background-color);
 }
 
-.info-input {
-    color: white;
-    font-family: "Aa小迷糊少女";
-    font-size: 1em;
+.input-frame {
     width: 50%;
     margin: 0.2em;
-    padding: 0.5em 0.5em 0.5em 2em;
-    box-sizing: border-box;
-    background-color: transparent;
-    border-radius: 1em;
-    border: none;
-    outline: none;
-    background-size: 1em;
-    background-position: 0.6em center;
-    background-repeat: no-repeat;
-    transition: var(--transition-duration);
-}
-
-.info-input:focus, .info-input:hover {
-    background-color: var(--hovered-background-color);
-}
-
-.info-input::placeholder {
-    color: rgb(192, 192, 192);
 }
 
 .nick-input {

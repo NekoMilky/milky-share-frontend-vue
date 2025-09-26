@@ -29,17 +29,17 @@ const finalStarPlaylist = computed(() => {
 <template>
     <div class="container">
         <!--搜索歌单-->
-        <input v-model="searchQuery" class="search-bar" style="height: 8%;" type="text" placeholder="搜索歌单" />
+        <input v-model="searchQuery" class="input-frame with-icon" type="text" placeholder="搜索歌单" />
         <!--创建的歌单-->
         <Playlist 
-            style="width: 100%; height: 45%;" 
+            style="height: 45%;" 
             :label="'创建的歌单'" 
             :list="finalCreatePlaylist" 
             :button="{ src: addImg, onClick: playlistStore.playlistCreate }" 
         />
         <!--收藏的歌单-->
         <Playlist 
-            style="width: 100%; height: 45%;" 
+            style="height: 45%;" 
             :label="'收藏的歌单'" 
             :list="finalStarPlaylist" 
         />
@@ -50,5 +50,11 @@ const finalStarPlaylist = computed(() => {
 .container {
     flex-direction: column;
     font-size: 1rem;
+}
+
+.input-frame {
+    width: 90%;
+    height: 8%;
+    background-image: url("/src/assets/images/buttons/search.png");
 }
 </style>

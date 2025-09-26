@@ -5,11 +5,13 @@ import { getAll, getAllByPlaylist, upload, remove } from "/src/api/Song";
 import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
 import { useMusicPlayer } from "/src/stores/MusicPlayer";
+import { usePlaylist } from "/src/stores/Playlist";
 
 export const useSongList = defineStore("SongList", () => {
     const dialogStore = useDialog();
     const userStore = useUser();
     const musicPlayerStore = useMusicPlayer();
+    const playlistStore = usePlaylist();
 
     // 总列表
     const songList = ref([]);
@@ -26,7 +28,7 @@ export const useSongList = defineStore("SongList", () => {
     // 当前查看歌单的歌曲列表
     const viewingSongList = ref([]);
     const updateViewingSongList = async (playlistId) => {
-        if (!checkEmptyField(playlistId, "歌单id")) {
+        if (playlistId === "") {
             return;
         }
         const response = await getAllByPlaylist(playlistId);

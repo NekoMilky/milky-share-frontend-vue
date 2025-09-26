@@ -37,7 +37,6 @@ const userStore = useUser();
 .container {
     width: 25%;
     height: auto;
-    flex-direction: column;
     transition: var(--transition-duration);
 }
 
