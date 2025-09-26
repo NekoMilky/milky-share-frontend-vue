@@ -55,7 +55,7 @@ const finalStarPlaylist = computed(() => {
 
 .input-frame {
     width: 90%;
-    height: 8%;
+    height: 5%;
     background-image: url("/src/assets/images/buttons/search.png");
 }
 </style>
