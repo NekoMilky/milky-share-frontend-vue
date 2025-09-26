@@ -1,9 +1,12 @@
 <script setup>
 import { useSongList } from "/src/stores/SongList";
+import { usePlaylist } from "/src/stores/Playlist";
 import MusicPlayer from "/src/components/common/MusicPlayer.vue";
 import SongList from "/src/components/common/SongList.vue";
 import Selector from "/src/components/page/playlist/Selector.vue";
 import PlaylistInfo from "/src/components/page/playlist/PlaylistInfo.vue";
+
+const playlistStore = usePlaylist();
 
 const columns = [
     { key: "index", label: "#", sortable: false, width: 10 },
@@ -19,13 +22,18 @@ const getList = () => {
 <template>
     <div class="page">
         <MusicPlayer class="box" style="height: 20%;" />
-        <div class="sub-row">
-            <Selector class="box" style="width: 20%;" />
-            <div class="box sub-column">
-                <PlaylistInfo style="height: 20%;" />
-                <SongList style="height: 75%;" :columns="columns" :list="getList" />
+        <template v-if="playlistStore.viewingPlaylistId === ''">
+            <Selector class="box" />
+        </template>
+        <template v-else>
+            <div class="sub-row">
+                <Selector class="box" style="width: 20%;" />
+                <div class="box sub-column">
+                    <PlaylistInfo style="height: 20%;" />
+                    <SongList style="height: 75%;" :columns="columns" :list="getList" />
+                </div>
             </div>
-        </div>
+        </template>
     </div>
 </template>
 
