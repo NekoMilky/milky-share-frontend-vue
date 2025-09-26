@@ -69,7 +69,7 @@ const props = defineProps({
 }
 
 .button {
-    height: 100%;
+    height: 1em;
     aspect-ratio: 1;
     border-radius: 50%;
     margin-left: 0.5em;

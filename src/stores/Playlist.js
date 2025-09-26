@@ -14,6 +14,9 @@ export const usePlaylist = defineStore("Playlist", () => {
     // 当前用户歌单总列表
     const createPlaylist = ref([]);
     const starPlaylist = ref([]);
+    const hasPlaylist = computed(() => {
+        return createPlaylist.value.length + starPlaylist.value.length > 0;
+    });
     const updatePlaylistList = async (viewId = null) => {
         if (!userStore.isLogged) {
             createPlaylist.value = [];
@@ -122,6 +125,7 @@ export const usePlaylist = defineStore("Playlist", () => {
     };
 
     return {
+        hasPlaylist,
         createPlaylist,
         starPlaylist,
         viewingPlaylist,
