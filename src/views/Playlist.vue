@@ -22,7 +22,7 @@ const getList = () => {
 <template>
     <div class="page">
         <MusicPlayer class="box" style="height: 20%;" />
-        <template v-if="playlistStore.viewingPlaylistId === ''">
+        <template v-if="playlistStore.viewingPlaylist.id === ''">
             <Selector class="box" />
         </template>
         <template v-else>

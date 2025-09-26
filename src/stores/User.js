@@ -38,7 +38,7 @@ export const useUser = defineStore("User", () => {
         userOrigin.value = { nickname: user.value.nickname };
         console.log("已更新个人档案");
         // 更新歌单列表
-        playlistStore.updatePlaylistList();
+        playlistStore.updatePlaylistList("default");
     };
 
     // 注册、登录与退出登录
