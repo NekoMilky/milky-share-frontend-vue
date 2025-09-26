@@ -55,7 +55,7 @@ export const isSuccessWithToast = (response, hideSuccessToast = false) => {
 export const checkEmptyField = (value, label) => {
     const isEmpty = value === undefined
         || value === null
-        || (typeof value === "string" && value.trim() === "")
+        || (typeof value === "string" && !value.trim())
         || (Array.isArray(value) && value.length === 0);
     if (isEmpty) {
         isSuccessWithToast({ message: `${label}不能为空值`, success: false })

@@ -20,7 +20,7 @@ export const useUser = defineStore("User", () => {
     const user = ref(emptyUser());
     const userOrigin = ref({});
     const isLogged = computed(() => {
-        return user.value.id !== "";
+        return user.value.id;
     });
     const updateProfile = async () => {
         if (!isLogged.value) {

@@ -30,7 +30,7 @@ const props = defineProps({
             {{ props.label }}
             <img 
                 class="button" 
-                v-if="props.button.src !== ''"
+                v-if="props.button.src"
                 :src="props.button.src"
                 @click="props.button.onClick"
             />

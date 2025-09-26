@@ -11,7 +11,7 @@ const playlistStore = usePlaylist();
 // 歌单搜索
 const searchQuery = debouncedRef("");
 const searchFilter = (list) => {
-    if (searchQuery.value === "") {
+    if (!searchQuery.value) {
         return list;
     }
     return list.filter((playlist) => {

@@ -46,19 +46,19 @@ const hasSpecialChar = computed(() => {
 // 问题实时反馈
 const isNicknameUsable = ref(true);
 watch(() => nickname.value, async (value) => {
-    if (isTag("register") && value !== "") {
+    if (isTag("register") && value) {
         const response = await checkNickname(value);
         isNicknameUsable.value = response.data.usable;
     }
 });
 const issue = computed(() => {
-    if (nickname.value === "") {
+    if (!nickname.value) {
         return "昵称不可为空";
     }
     if (isTag("register") && !isNicknameUsable.value) {
         return "昵称不可用";
     }
-    if (password.value === "") {
+    if (!password.value) {
         return "密码不可为空";
     }
     if (isTag("register")) {

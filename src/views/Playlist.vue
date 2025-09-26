@@ -22,10 +22,7 @@ const getList = () => {
 <template>
     <div class="page">
         <MusicPlayer class="box" style="height: 20%;" />
-        <template v-if="playlistStore.viewingPlaylist.id === ''">
-            <Selector class="box" />
-        </template>
-        <template v-else>
+        <template v-if="playlistStore.viewingPlaylist.id">
             <div class="sub-row">
                 <Selector class="box" style="width: 20%;" />
                 <div class="box sub-column">
@@ -33,6 +30,9 @@ const getList = () => {
                     <SongList style="height: 75%;" :columns="columns" :list="getList" />
                 </div>
             </div>
+        </template>
+        <template v-else>
+            <Selector class="box" />
         </template>
     </div>
 </template>

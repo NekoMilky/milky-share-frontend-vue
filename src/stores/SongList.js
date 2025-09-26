@@ -26,7 +26,7 @@ export const useSongList = defineStore("SongList", () => {
     // 当前查看歌单的歌曲列表
     const viewingSongList = ref([]);
     const updateViewingSongList = async (playlistId) => {
-        if (playlistId === "") {
+        if (!playlistId) {
             return;
         }
         const response = await getAllByPlaylist(playlistId);

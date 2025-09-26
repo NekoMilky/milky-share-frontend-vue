@@ -164,7 +164,7 @@ const sortBy = ref("none");
 const sortDesc = ref(false);
 const finalSongList = computed(() => {
     let result = songList.value;
-    if (searchQuery.value !== "") {
+    if (searchQuery.value) {
         result = result.filter((song) => {
             const lowerSearchQuery = searchQuery.value.toLowerCase();
             const titleIncluded = song.title.toLowerCase().includes(lowerSearchQuery);

@@ -150,7 +150,7 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
     // 初始化
     onMounted(async () => {
         // 恢复播放进度
-        if (playingSong.value.id !== "") {
+        if (playingSong.value.id) {
             const current = currentTime.value;
             if (await loadSong(playingSong.value.id, false)) {
                 audio.value.currentTime = current;
