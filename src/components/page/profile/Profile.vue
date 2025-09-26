@@ -8,10 +8,8 @@ import defaultAvatarImg from "/src/assets/images/default/avatar.png";
 
 const userStore = useUser();
 
-const avatarInput = ref(null);
-
 // 处理头像选择
-const selectedFile = ref(null);
+const avatarInput = ref(null);
 const selectFiles = async (files) => {
     if (!checkEmptyField(files, "头像文件")) {
         return;
@@ -20,8 +18,7 @@ const selectFiles = async (files) => {
     if (imageFiles.length === 0) {
         return;
     }
-    selectedFile.value = await compressImage(imageFiles[0]);
-    userStore.user.avatar = URL.createObjectURL(selectedFile.value);
+    userStore.userSaveProfile(await compressImage(imageFiles[0]));
 };
 </script>
 
@@ -47,13 +44,13 @@ const selectFiles = async (files) => {
                         v-model="userStore.user.nickname" 
                         class="input-frame" 
                         type="text" 
-                        placeholder="请输入昵称" 
+                        placeholder="请输入昵称"
+                        v-on:blur="userStore.userSaveProfile(null)" 
                     />
                 </div>
             </div>
         </div>
         <div class="button-list">
-            <div class="button" @click="userStore.userSaveProfile(selectedFile)">保存</div>
             <div class="button danger" @click="userStore.userLogout">退出登录</div>
         </div>
     </div>
