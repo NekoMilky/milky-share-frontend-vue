@@ -8,18 +8,24 @@ export const useTagSelector = defineStore("TagSelector", () => {
     // 当前选项
     const currentTag = ref("home");
     const bannedWhenVisitor = ["playlist", "upload"];
+    const checkBanned = () => {
+        if (bannedWhenVisitor.includes(currentTag.value)) {
+            selectTag("home");
+        }
+    };
     const selectTag = (tag) => {
         if (!userStore.isLogged && bannedWhenVisitor.includes(tag)) {
             return;
         }
         currentTag.value = tag;
-    }
+    };
     const isSelected = (tag) => {
         return currentTag.value === tag;
-    }
+    };
 
     return {
         currentTag,
+        checkBanned,
         selectTag,
         isSelected
     };

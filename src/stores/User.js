@@ -23,15 +23,15 @@ export const useUser = defineStore("User", () => {
         return user.value.id !== "";
     });
     const updateProfile = async () => {
-        if (!isLogged) {
+        if (!isLogged.value) {
             user.value = emptyUser();
-            tagStore.selectTag("home");
+            tagStore.checkBanned();
             return;
         }
         const response = await get(user.value.id);
         user.value = emptyUser();
         if (!isSuccessWithToast(response, true)) {
-            tagStore.selectTag("home");
+            tagStore.checkBanned();
             return;
         }
         user.value = response.data.user;
@@ -62,7 +62,7 @@ export const useUser = defineStore("User", () => {
     };
     const confirmUserLogout = () => {
         user.value = emptyUser();
-        tagStore.selectTag("home");
+        updateProfile();
     };
 
     // 保存档案，包含状态锁
