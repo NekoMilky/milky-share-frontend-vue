@@ -1,4 +1,28 @@
+import { customRef } from "vue";
 import { useToast } from "/src/stores/Toast";
+
+// 带防抖的ref
+export const debouncedRef = (value, delay = 1000) => {
+    let timeoutId = null;
+    return customRef((track, trigger) => {
+        return {
+            get: () => {
+                track();
+                return value;
+            },
+            set: (newValue) => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+                timeoutId = setTimeout(() => {
+                    value = newValue;
+                    trigger();
+                    timeoutId = null;
+                }, delay);
+            }
+        };
+    });
+};
 
 // 时间格式化
 export const timeFormat = (seconds) => {

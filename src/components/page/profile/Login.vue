@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { checkNickname } from "/src/api/User";
 import { useUser } from "/src/stores/User";
-import { isSuccessWithToast } from "/src/utils/Utility";
+import { isSuccessWithToast, debouncedRef } from "/src/utils/Utility";
 
 const userStore = useUser();
 
@@ -20,9 +20,9 @@ const isTag = (value) => {
 }
 
 // 接收输入
-const nickname = ref("");
-const password = ref("");
-const confirmPassword = ref("");
+const nickname = debouncedRef("");
+const password = debouncedRef("");
+const confirmPassword = debouncedRef("");
 const clearInput = () => {
     nickname.value = "";
     password.value = "";
