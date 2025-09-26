@@ -112,7 +112,6 @@ export const usePlaylist = defineStore("Playlist", () => {
         if (!checkEmptyField(viewingPlaylist.value.id, "正在查看的歌单id")) {
             return;
         }
-        console.log(!coverFile);
         if (!coverFile && !hasObjectChanges(viewingPlaylistOrigin.value, viewingPlaylist.value)) {
             return;
         }
@@ -120,9 +119,7 @@ export const usePlaylist = defineStore("Playlist", () => {
         isSavingInfo.value = true;
         const response = await saveInfo(coverFile, viewingPlaylist.value);
         isSavingInfo.value = false;
-        if (!isSuccessWithToast(response)) {
-            return;
-        }
+        isSuccessWithToast(response);
         updatePlaylistList();
     };
 
