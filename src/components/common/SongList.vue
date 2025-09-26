@@ -1,6 +1,6 @@
 <script setup>
 import { ref, nextTick, watch, onMounted, computed, onUnmounted } from "vue";
-import { timeFormat } from "/src/utils/Utility";
+import { timeFormat, debouncedRef } from "/src/utils/Utility";
 import { get } from "/src/api/Song";
 import { useRightClickMenu } from "/src/stores/RightClickMenu";
 import { useUser } from "/src/stores/User";
@@ -159,7 +159,7 @@ const handleRightMenu = (event, song) => {
 };
 
 // 音乐列表搜索与排序
-const searchQuery = ref("");
+const searchQuery = debouncedRef("");
 const sortBy = ref("none");
 const sortDesc = ref(false);
 const finalSongList = computed(() => {

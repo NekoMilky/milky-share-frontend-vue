@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
+import { debouncedRef } from "/src/utils/Utility";
 import { usePlaylist } from "/src/stores/Playlist";
 import Playlist from "/src/components/page/playlist/Playlist.vue";
 
@@ -8,7 +9,7 @@ import addImg from "/src/assets/images/buttons/add.png";
 const playlistStore = usePlaylist();
 
 // 歌单搜索
-const searchQuery = ref("");
+const searchQuery = debouncedRef("");
 const searchFilter = (list) => {
     if (searchQuery.value === "") {
         return list;
