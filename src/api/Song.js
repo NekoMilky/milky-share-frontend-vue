@@ -32,6 +32,24 @@ export const getAllByPlaylist = async (playlistId) => {
     return response;
 };
 
+export const getPlaylistBySong = async (userId, songId) => {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("songId", songId);
+    const response = await sendPost("song/get_playlist_by_song", formData, {});
+    return response;
+};
+
+export const applyStarSong = async (userId, songId, starInfo) => {
+    const data = {
+        userId: userId,
+        songId: songId,
+        starInfo: starInfo
+    };
+    const response = await sendPost("song/apply_star_song", data, { 'Content-Type': 'application/json' });
+    return response;
+};
+
 export const remove = async (userId, songId) => {
     const formData = new FormData();
     formData.append("userId", userId);

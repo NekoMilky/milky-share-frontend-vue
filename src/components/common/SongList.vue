@@ -12,8 +12,8 @@ import deleteImg from "/src/assets/images/buttons/delete.png";
 import playImg from "/src/assets/images/buttons/play.png";
 import pauseImg from "/src/assets/images/buttons/pause.png";
 import downloadImg from "/src/assets/images/buttons/download.png";
-import likeImg from "/src/assets/images/buttons/like.png";
-import hasLikedImg from "/src/assets/images/buttons/has-liked.png";
+import starImg from "/src/assets/images/buttons/star.png";
+import hasStaredImg from "/src/assets/images/buttons/has-stared.png";
 import playCircleImg from "/src/assets/images/buttons-circle/play.png";
 import pauseCircleImg from "/src/assets/images/buttons-circle/pause.png";
 
@@ -38,7 +38,7 @@ const props = defineProps({
             { key: "title", label: "标题", sortable: true, width: 45 },
             { key: "album", label: "专辑", sortable: true, width: 20 },
             { key: "duration", label: "时长", sortable: true, width: 15 },
-            { key: "like", label: "喜欢", sortable: false, width: 10 }
+            { key: "star", label: "收藏", sortable: false, width: 10 }
         ]
     },
     list: {
@@ -353,10 +353,11 @@ onMounted(() => {
                         <template v-if="column.key === 'duration'">
                             {{ timeFormat(song.duration) }}
                         </template>
-                        <template v-if="column.key === 'like'">
+                        <template v-if="column.key === 'star'">
                             <img 
                                 class="song-item-button"
-                                :src="likeImg"
+                                :src="starImg"
+                                @click="songListStore.starSong(song.id)"
                             />
                         </template>
                     </div>

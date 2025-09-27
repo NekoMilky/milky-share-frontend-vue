@@ -1,15 +1,17 @@
 import { defineStore } from "pinia";
 import { ref, onMounted } from "vue";
 import { isSuccessWithToast, checkEmptyField, checkEmptyFields } from "/src/utils/Utility";
-import { getAll, getAllByPlaylist, upload, remove } from "/src/api/Song";
+import { getAll, getAllByPlaylist, getPlaylistBySong, applyStarSong, upload, remove } from "/src/api/Song";
 import { useDialog } from "/src/stores/Dialog";
 import { useUser } from "/src/stores/User";
 import { useMusicPlayer } from "/src/stores/MusicPlayer";
+import { usePlaylist } from "/src/stores/Playlist";
 
 export const useSongList = defineStore("SongList", () => {
     const dialogStore = useDialog();
     const userStore = useUser();
     const musicPlayerStore = useMusicPlayer();
+    const playlistStore = usePlaylist();
 
     // 总列表
     const songList = ref([]);
@@ -83,6 +85,46 @@ export const useSongList = defineStore("SongList", () => {
         updateSongList();
     };
 
+    // 收藏歌曲
+    const starSong = async (songId) => {
+        if (!userStore.isLogged) {
+            isSuccessWithToast({ message: "游客无法收藏歌曲", success: false });
+            return;
+        }
+        if (!checkEmptyField(songId, "歌曲id")) {
+            return;
+        }
+        const response = await getPlaylistBySong(userStore.user.id, songId);
+        if (!isSuccessWithToast(response, true)) {
+            return;
+        }
+        let rows = [{ key: "title", type: "text", text: "收藏歌曲" }];
+        response.data.playlists.forEach((playlist) => {
+            rows.push({ 
+                key: playlist.id, 
+                type: "input", 
+                input: { 
+                    required: true, 
+                    type: "checkbox", 
+                    label: playlist.name, 
+                    value: playlist.hasStared
+                }
+            });
+        });
+        dialogStore.loadDialog(rows, confirmStarSong, [
+            { key: "userId", value: userStore.user.id },
+            { key: "songId", value: songId }
+        ]);
+    };
+    const confirmStarSong = async (values) => {
+        const { userId, songId, ...starInfo } = values;
+        const response = await applyStarSong(userId, songId, starInfo);
+        if (!isSuccessWithToast(response)) {
+            return;
+        }
+        updateViewingSongList(playlistStore.viewingPlaylist.id);
+    };
+
     // 初始化
     onMounted(() => {
         updateSongList();
@@ -93,6 +135,7 @@ export const useSongList = defineStore("SongList", () => {
         viewingSongList,
         updateViewingSongList,
         uploadSong,
-        removeSong
+        removeSong,
+        starSong
     };
 });
