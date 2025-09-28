@@ -110,6 +110,10 @@ export const usePlaylist = defineStore("Playlist", () => {
         if (isSavingInfo.value) {
             return;
         }
+        if (!userStore.isLogged) {
+            isSuccessWithToast({ message: "游客无法修改歌单信息", success: false });
+            return;
+        }
         if (!checkEmptyField(viewingPlaylist.value.id, "正在查看的歌单id")) {
             return;
         }
@@ -118,7 +122,7 @@ export const usePlaylist = defineStore("Playlist", () => {
         }
         // 开始保存
         isSavingInfo.value = true;
-        const response = await saveInfo(coverFile, viewingPlaylist.value);
+        const response = await saveInfo(coverFile, userStore.user.id, viewingPlaylist.value);
         isSavingInfo.value = false;
         isSuccessWithToast(response);
         updatePlaylistList();

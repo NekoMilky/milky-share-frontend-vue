@@ -14,9 +14,10 @@ export const upload = async (songFile, songInfo, userId) => {
 };
 
 export const get = async (songId) => {
-    const formData = new FormData();
-    formData.append("songId", songId);
-    const response = await sendPost("song/get", formData, {});
+    const data = {
+        songId: songId
+    };
+    const response = await sendPost("song/get", data, {});
     return response;
 };
 
@@ -26,17 +27,19 @@ export const getAll = async () => {
 };
 
 export const getAllByPlaylist = async (playlistId) => {
-    const formData = new FormData();
-    formData.append("playlistId", playlistId);
-    const response = await sendPost("song/get_all_by_playlist", formData, {});
+    const data = {
+        playlistId: playlistId
+    };
+    const response = await sendPost("song/get_all_by_playlist", data, {});
     return response;
 };
 
 export const getPlaylistBySong = async (userId, songId) => {
-    const formData = new FormData();
-    formData.append("userId", userId);
-    formData.append("songId", songId);
-    const response = await sendPost("song/get_playlist_by_song", formData, {});
+    const data = {
+        userId: userId,
+        songId: songId
+    };
+    const response = await sendPost("song/get_playlist_by_song", data, {});
     return response;
 };
 
@@ -51,9 +54,10 @@ export const applyStarSong = async (userId, songId, starInfo) => {
 };
 
 export const remove = async (userId, songId) => {
-    const formData = new FormData();
-    formData.append("userId", userId);
-    formData.append("songId", songId);
-    const response = await sendPost("song/remove", formData, {});
+    const data = {
+        userId: userId,
+        songId: songId
+    };
+    const response = await sendPost("song/remove", data, {});
     return response;
 };

@@ -1,25 +1,28 @@
 import { sendPost } from "/src/api/Index";
 
 export const login = async (nickname, password) => {
-    const formData = new FormData();
-    formData.append("nickname", nickname);
-    formData.append("password", password);
-    const response = await sendPost("user/login", formData, {});
+    const data = {
+        nickname: nickname,
+        password: password
+    };
+    const response = await sendPost("user/login", data, {});
     return response;
 };
 
 export const register = async (nickname, password) => {
-    const formData = new FormData();
-    formData.append("nickname", nickname);
-    formData.append("password", password);
-    const response = await sendPost("user/register", formData, {});
+    const data = {
+        nickname: nickname,
+        password: password
+    };
+    const response = await sendPost("user/register", data, {});
     return response;
 };
 
 export const get = async (userId) => {
-    const formData = new FormData();
-    formData.append("userId", userId);
-    const response = await sendPost("user/get", formData, {});
+    const data = {
+        userId: userId
+    };
+    const response = await sendPost("user/get", data, {});
     return response;
 };
 
@@ -33,8 +36,9 @@ export const saveProfile = async (avatarFile, userInfo) => {
 };
 
 export const checkNickname = async (nickname) => {
-    const formData = new FormData();
-    formData.append("nickname", nickname);
-    const response = await sendPost("user/check_nickname", formData, {});
+    const data = {
+        nickname: nickname
+    };
+    const response = await sendPost("user/check_nickname", data, {});
     return response;
 };
