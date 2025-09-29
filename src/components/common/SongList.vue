@@ -43,15 +43,10 @@ const props = defineProps({
         ]
     },
     list: {
-        type: Function,
-        default: () => {
-            return useSongList().songList;
-        }
+        type: Array<Song>,
+        default: []
     }
 });
-
-// 音乐列表
-const songList = computed<Array<Song>>(() => props.list());
 
 // 列配置
 const columnWidths = ref<JSONObject<number>>({});
@@ -164,7 +159,7 @@ const searchQuery = debouncedRef<string>("");
 const sortBy = ref<string>("none");
 const sortDesc = ref<boolean>(false);
 const finalSongList = computed<Array<Song>>(() => {
-    let result = songList.value;
+    let result = props.list;
     if (searchQuery.value) {
         result = result.filter((song) => {
             const lowerSearchQuery = searchQuery.value.toLowerCase();

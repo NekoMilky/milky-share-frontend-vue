@@ -13,13 +13,6 @@ export interface PageTag {
     label: string
 };
 
-export interface Toast {
-    id: string,
-    success: boolean,
-    message: string,
-    opacity: number
-};
-
 export interface RightClickMenu {
     key: string,
     label: string,

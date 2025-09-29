@@ -1,6 +1,13 @@
-import type { ApiResponse, Toast } from "@/types";
+import type { ApiResponse } from "@/types";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+
+interface Toast {
+    id: string,
+    success: boolean,
+    message: string,
+    opacity: number
+};
 
 export const useToast = defineStore("toast", () => {
     const delay = (ms: number) => {

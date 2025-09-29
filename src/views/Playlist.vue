@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Song, SongListColumn } from "@/types";
+import type { SongListColumn } from "@/types";
 import { useSongList } from "@/stores/songList";
 import { usePlaylist } from "@/stores/playlist";
 import MusicPlayer from "@/components/common/MusicPlayer.vue";
@@ -7,6 +7,7 @@ import SongList from "@/components/common/SongList.vue";
 import Selector from "@/components/page/playlist/Selector.vue";
 import PlaylistInfo from "@/components/page/playlist/PlaylistInfo.vue";
 
+const songListStore = useSongList();
 const playlistStore = usePlaylist();
 
 const columns: Array<SongListColumn> = [
@@ -15,9 +16,6 @@ const columns: Array<SongListColumn> = [
     { key: "album", label: "专辑", sortable: true, width: 25 },
     { key: "duration", label: "时长", sortable: true, width: 15 }
 ];
-const getList = (): Array<Song> => {
-    return useSongList().viewingSongList;
-};
 </script>
 
 <template>
@@ -28,7 +26,7 @@ const getList = (): Array<Song> => {
                 <Selector class="box" style="width: 20%;" />
                 <div class="box sub-column">
                     <PlaylistInfo style="height: 20%;" />
-                    <SongList style="height: 75%;" :columns="columns" :list="getList" />
+                    <SongList style="height: 75%;" :columns="columns" :list="songListStore.viewingSongList" />
                 </div>
             </div>
         </template>
