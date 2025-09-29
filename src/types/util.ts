@@ -6,6 +6,13 @@ export interface ApiResponse {
     data?: JSONObject,
 };
 
+export interface PageTag {
+    path: string,
+    iconSrc: string,
+    isAvatar?: boolean,
+    label: string
+};
+
 export interface Toast {
     id: string,
     success: boolean,

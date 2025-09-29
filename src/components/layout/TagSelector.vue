@@ -1,35 +1,28 @@
 <script setup lang="ts">
-import { useTagSelector } from "@/stores/tagSelector";
-import { useUser } from "@/stores/user";
+import type { PageTag } from "@/types";
+import { useRoute } from "vue-router";
 
-import defaultAvatarImg from "@/assets/images/default/avatar.png";
+const route = useRoute();
 
-const tagStore = useTagSelector();
-const userStore = useUser();
+const props = defineProps({
+    tags: {
+        type: Array<PageTag>,
+        default: []
+    }
+});
 </script>
 
 <template>
     <div class="container">
-        <div class="row" @click="tagStore.selectTag('profile')" :class="{ 'row-selected': tagStore.isSelected('profile') }">
-            <img 
-                class="button avatar"
-                :src="userStore.user.avatar ?? defaultAvatarImg"
-            />
-            <span v-if="userStore.isLogged">档案</span>
-            <span v-else>未登录</span>
-        </div>
-        <div class="row" @click="tagStore.selectTag('home')" :class="{ 'row-selected': tagStore.isSelected('home') }">
-            <img class="button" src="@/assets/images/buttons/home.png" />
-            <span>首页</span>
-        </div>
-        <div v-if="userStore.isLogged" class="row" @click="tagStore.selectTag('playlist')" :class="{ 'row-selected': tagStore.isSelected('playlist') }">
-            <img class="button" src="@/assets/images/buttons/playlist.png" />
-            <span>歌单</span>
-        </div>
-        <div v-if="userStore.isLogged" class="row" @click="tagStore.selectTag('upload')" :class="{ 'row-selected': tagStore.isSelected('upload') }">
-            <img class="button" src="@/assets/images/buttons/upload.png" />
-            <span>上传</span>
-        </div>
+        <RouterLink 
+            v-for="tag in props.tags"
+            :to="tag.path" 
+            class="row" 
+            :class="{ 'row-selected': route.path === tag.path }"
+        >
+            <img class="button" :class="{ 'avatar': tag.isAvatar }" :src="tag.iconSrc" />
+            <span>{{ tag.label }}</span>
+        </RouterLink>
     </div>
 </template>
 
@@ -86,6 +79,7 @@ const userStore = useUser();
     border-radius: 1.5em;
     background-color: transparent;
     transition: var(--transition-duration);
+    color: white;
 }
 
 .row:not(.row-selected):hover {
