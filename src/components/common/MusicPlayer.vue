@@ -1,23 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { timeFormat } from "/src/utils/Utility";
-import { useMusicPlayer } from "/src/stores/MusicPlayer";
+import { timeFormat } from "@/utils";
+import { useMusicPlayer } from "@/stores/musicPlayer";
 
-import defaultCoverImg from "/src/assets/images/default/cover.png";
-import playCircleImg from "/src/assets/images/buttons-circle/play.png";
-import pauseCircleImg from "/src/assets/images/buttons-circle/pause.png";
+import defaultCoverImg from "@/assets/images/default/cover.png";
+import playCircleImg from "@/assets/images/buttons-circle/play.png";
+import pauseCircleImg from "@/assets/images/buttons-circle/pause.png";
 
 const musicPlayerStore = useMusicPlayer();
 
-const progressThumb = ref(null);
-const getProgressThumbWidth = () => {
+const progressThumb = ref<HTMLDivElement | null>(null);
+const getProgressThumbWidth = (): number => {
     if (!progressThumb.value) {
         return 0;
     }
     return parseFloat(getComputedStyle(progressThumb.value).width);
 };
-const progressContainer = ref(null);
-const getProgressContainerBox = () => {
+const progressContainer = ref<HTMLDivElement | null>(null);
+const getProgressContainerBox = (): DOMRect | null => {
     if (!progressContainer.value) {
         return null;
     }
@@ -25,27 +25,30 @@ const getProgressContainerBox = () => {
 };
 
 // 点击轨道/拖拽进度条
-const isDraggingProgress = ref(false);
-const changeProgress = (event) => {
+const isDraggingProgress = ref<boolean>(false);
+const changeProgress = (event: MouseEvent): void => {
     if (!musicPlayerStore.isAudioLoaded) {
         return;
     }
-    const containerBox = getProgressContainerBox()
+    const containerBox = getProgressContainerBox();
+    if (!containerBox) {
+        return;
+    }
     const offsetX = event.clientX + getProgressThumbWidth() / 2 - containerBox.left;
     const progress = Math.min(Math.max(0, offsetX / containerBox.width), 1);
     musicPlayerStore.setCurrentTime(progress * musicPlayerStore.duration);
 };
-const startDragProgress = () => {
+const startDragProgress = (): void => {
     isDraggingProgress.value = true;
     window.addEventListener("mousemove", dragProgress);
     window.addEventListener("mouseup", stopDragProgress);
 };
-const stopDragProgress = () => {
+const stopDragProgress = (): void => {
     isDraggingProgress.value = false;
     window.removeEventListener("mousemove", dragProgress);
     window.removeEventListener("mouseup", stopDragProgress);
 };
-const dragProgress = (event) => {
+const dragProgress = (event: MouseEvent): void => {
     if (!isDraggingProgress.value) {
         return;
     }
@@ -69,7 +72,7 @@ onMounted(() => {
             <div class="column column-music-cover">
                 <img 
                     class="music-cover" 
-                    :src="musicPlayerStore.playingSong.cover || defaultCoverImg" 
+                    :src="musicPlayerStore.playingSong.cover as string ?? defaultCoverImg" 
                     :style="{ rotate: `${musicPlayerStore.coverRotation}deg` }"
                 />
             </div>
@@ -87,17 +90,17 @@ onMounted(() => {
             <div class="column column-control">
                 <img 
                     class="control-button" 
-                    src="/src/assets/images/buttons-circle/previous-song.png" 
+                    src="@/assets/images/buttons-circle/previous-song.png" 
                     @click="musicPlayerStore.switchPlay(true)"
                 />
                 <img 
                     class="control-button" 
                     :src="musicPlayerStore.isPlaying ? pauseCircleImg : playCircleImg" 
-                    @click="musicPlayerStore.togglePlay" 
+                    @click="musicPlayerStore.togglePlay()" 
                 />
                 <img 
                     class="control-button" 
-                    src="/src/assets/images/buttons-circle/next-song.png" 
+                    src="@/assets/images/buttons-circle/next-song.png" 
                     @click="musicPlayerStore.switchPlay(false)"
                 />
             </div>
@@ -110,12 +113,12 @@ onMounted(() => {
                 <div 
                     class="progress-bar" 
                     :style="{ width: `${musicPlayerStore.progress}%` }" 
-                    @click="changeProgress"
+                    @click="changeProgress($event)"
                 ></div>
                 <div 
                     class="progress-thumb" 
                     :style="{ left: `calc(${musicPlayerStore.progress}% - ${getProgressThumbWidth() / 2}px)` }"
-                    @mousedown="startDragProgress"
+                    @mousedown="startDragProgress()"
                     ref="progressThumb"
                 ></div>
             </div>

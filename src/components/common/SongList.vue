@@ -1,29 +1,30 @@
-<script setup>
+<script setup lang="ts">
 import { ref, nextTick, watch, onMounted, computed, onUnmounted } from "vue";
-import { timeFormat, debouncedRef } from "/src/utils/Utility";
-import { get } from "/src/api/Song";
-import { useRightClickMenu } from "/src/stores/RightClickMenu";
-import { useUser } from "/src/stores/User";
-import { useMusicPlayer } from "/src/stores/MusicPlayer";
-import { useSongList } from "/src/stores/SongList";
+import type { JSONObject, RightClickMenu, Song, SongListColumn } from "@/types";
+import { timeFormat, debouncedRef } from "@/utils";
+import { get } from "@/api/song";
+import { useRightClickMenu } from "@/stores/rightClickMenu";
+import { useUser } from "@/stores/user";
+import { useMusicPlayer } from "@/stores/musicPlayer";
+import { useSongList } from "@/stores/songList";
 
-import defaultCoverImg from "/src/assets/images/default/cover.png";
-import deleteImg from "/src/assets/images/buttons/delete.png";
-import playImg from "/src/assets/images/buttons/play.png";
-import pauseImg from "/src/assets/images/buttons/pause.png";
-import downloadImg from "/src/assets/images/buttons/download.png";
-import starImg from "/src/assets/images/buttons/star.png";
-import hasStaredImg from "/src/assets/images/buttons/has-stared.png";
-import playCircleImg from "/src/assets/images/buttons-circle/play.png";
-import pauseCircleImg from "/src/assets/images/buttons-circle/pause.png";
+import defaultCoverImg from "@/assets/images/default/cover.png";
+import deleteImg from "@/assets/images/buttons/delete.png";
+import playImg from "@/assets/images/buttons/play.png";
+import pauseImg from "@/assets/images/buttons/pause.png";
+import downloadImg from "@/assets/images/buttons/download.png";
+import starImg from "@/assets/images/buttons/star.png";
+import hasStaredImg from "@/assets/images/buttons/has-stared.png";
+import playCircleImg from "@/assets/images/buttons-circle/play.png";
+import pauseCircleImg from "@/assets/images/buttons-circle/pause.png";
 
 const rightClickMenuStore = useRightClickMenu();
 const userStore = useUser();
 const musicPlayerStore = useMusicPlayer();
 const songListStore = useSongList();
 
-const songListHeader = ref(null);
-const getSongListHeaderWidth = () => {
+const songListHeader = ref<HTMLDivElement | null>(null);
+const getSongListHeaderWidth = (): number => {
     if (!songListHeader.value) {
         return 0;
     }
@@ -32,7 +33,7 @@ const getSongListHeaderWidth = () => {
 
 const props = defineProps({
     columns: {
-        type: Array,
+        type: Array<SongListColumn>,
         default: [
             { key: "index", label: "#", sortable: false, width: 10 },
             { key: "title", label: "标题", sortable: true, width: 45 },
@@ -50,38 +51,38 @@ const props = defineProps({
 });
 
 // 音乐列表
-const songList = computed(() => props.list());
+const songList = computed<Array<Song>>(() => props.list());
 
 // 列配置
-const columnWidths = ref({});
-const initColumns = () => {
+const columnWidths = ref<JSONObject<number>>({});
+const initColumns = (): void => {
     props.columns.forEach((column) => {
         columnWidths.value[column.key] = column.width;
     });
 };
-const isDraggingColumn = ref(false);
-const currentColumn = ref("");
-const nextColumn = ref("");
-const isLeft = ref(false);
-const startX = ref(0);
-const startWidth = ref(0);
-const totalWidth = ref(0);
-const columnOrder = computed(() => {
+const isDraggingColumn = ref<boolean>(false);
+const currentColumn = ref<string>("");
+const nextColumn = ref<string>("");
+const isLeft = ref<boolean>(false);
+const startX = ref<number>(0);
+const startWidth = ref<number>(0);
+const totalWidth = ref<number>(0);
+const columnOrder = computed<Array<string>>(() => {
     return props.columns.map((column) => {
         return column.key;
     });
 });
-const isResizable = (column, left) => {
+const isResizable = (column: string, isLeft: boolean): boolean => {
     const index = columnOrder.value.indexOf(column);
-    if (left && index === 0) {
+    if (isLeft && index === 0) {
         return false;
     }
-    if (!left && index === columnOrder.value.length - 1) {
+    if (!isLeft && index === columnOrder.value.length - 1) {
         return false;
     }
     return true;
 }
-const startDragColumn = (column, left, event) => {
+const startDragColumn = (column: string, left: boolean, event: MouseEvent): void => {
     if (!isResizable(column, left)) {
         return;
     }
@@ -89,20 +90,20 @@ const startDragColumn = (column, left, event) => {
     isDraggingColumn.value = true;
     isLeft.value = left;
     currentColumn.value = column;
-    nextColumn.value = columnOrder.value[columnOrder.value.indexOf(currentColumn.value) + (isLeft.value ? -1 : 1)]; 
-    startWidth.value = columnWidths.value[currentColumn.value];
-    totalWidth.value = columnWidths.value[nextColumn.value] + startWidth.value;
+    nextColumn.value = columnOrder.value[columnOrder.value.indexOf(currentColumn.value) + (isLeft.value ? -1 : 1)] as string; 
+    startWidth.value = columnWidths.value[currentColumn.value] as number;
+    totalWidth.value = columnWidths.value[nextColumn.value] as number + startWidth.value;
     startX.value = event.clientX;
     // 监听事件
     window.addEventListener("mousemove", dragColumn);
     window.addEventListener("mouseup", stopDragColumn);
 };
-const stopDragColumn = () => {
+const stopDragColumn = (): void => {
     isDraggingColumn.value = false;
     window.removeEventListener("mousemove", dragColumn);
     window.removeEventListener("mouseup", stopDragColumn);
 };
-const dragColumn = (event) => {
+const dragColumn = (event: MouseEvent): void => {
     if (!isDraggingColumn.value) { 
         return; 
     }
@@ -115,19 +116,19 @@ const dragColumn = (event) => {
 };
 
 // 鼠标悬停显示播放按钮
-const mouseHoverIndex = ref(-1);
-const handleMouseEnter = (index) => {
+const mouseHoverIndex = ref<number>(-1);
+const handleMouseEnter = (index: number): void => {
     mouseHoverIndex.value = index;
 };
-const handleMouseLeave = (index) => {
+const handleMouseLeave = (index: number): void => {
     if (mouseHoverIndex.value === index) {
         mouseHoverIndex.value = -1;
     }
 };
 
 // 右键菜单
-const handleRightMenu = (event, song) => {
-    let menu = [];
+const handleRightMenu = (event: MouseEvent, song: Song): void => {
+    let menu: Array<RightClickMenu> = [];
     // 播放/暂停
     const isPlayingThis = song.id === musicPlayerStore.playingSong.id;
     const isPlaying = musicPlayerStore.isPlaying;
@@ -159,10 +160,10 @@ const handleRightMenu = (event, song) => {
 };
 
 // 音乐列表搜索与排序
-const searchQuery = debouncedRef("");
-const sortBy = ref("none");
-const sortDesc = ref(false);
-const finalSongList = computed(() => {
+const searchQuery = debouncedRef<string>("");
+const sortBy = ref<string>("none");
+const sortDesc = ref<boolean>(false);
+const finalSongList = computed<Array<Song>>(() => {
     let result = songList.value;
     if (searchQuery.value) {
         result = result.filter((song) => {
@@ -178,7 +179,7 @@ const finalSongList = computed(() => {
     }
     return result;
 });
-const switchSortBy = (column) => {
+const switchSortBy = (column: string): void => {
     if (sortBy.value === "none" || sortBy.value !== column) {
         sortBy.value = column;
         sortDesc.value = false;
@@ -192,7 +193,7 @@ const switchSortBy = (column) => {
         sortDesc.value = true;
     }
 };
-const sortSongList = (list) => {
+const sortSongList = (list: Array<Song>): Array<Song> => {
     let result = [...list];
     result.sort((a, b) => {
         let compareA, compareB;
@@ -208,6 +209,9 @@ const sortSongList = (list) => {
             compareA = a.duration;
             compareB = b.duration;
         }
+        if (!compareA || !compareB) {
+            return 0;
+        }
         if (sortDesc.value) {
             return compareA > compareB ? -1 : compareA < compareB ? 1 : 0;
         } 
@@ -217,7 +221,7 @@ const sortSongList = (list) => {
     });
     return result;
 };
-const getColumnName = (column, label) => {
+const getColumnName = (column: string, label: string): string => {
     if (sortBy.value !== column) {
         return label;
     }
@@ -230,9 +234,9 @@ const getColumnName = (column, label) => {
 };
 
 // 列表表头滚动条修正
-const songListItems = ref(null);
-const hasScrollbar = ref(false);
-const checkScrollbar = () => {
+const songListItems = ref<HTMLDivElement | null>(null);
+const hasScrollbar = ref<boolean>(false);
+const checkScrollbar = (): void => {
     hasScrollbar.value = false;
     if (songListItems.value) {
         hasScrollbar.value = songListItems.value.scrollHeight > songListItems.value.clientHeight;
@@ -244,13 +248,13 @@ watch(() => finalSongList.value, async () => {
 });
 
 // 下载音乐
-const songDownload = async (songId) => {
+const songDownload = async (songId: string): Promise<void> => {
     const response = await get(songId);
     if (!response.success) {
         console.error(response.message);
         return;
     }
-    const url = response.data.song.url;
+    const url = (response.data?.song as Song).url as string;
     const link = document.createElement("a");
     link.href = url;
     link.click();
@@ -330,18 +334,18 @@ onMounted(() => {
                                 v-if="song.id === musicPlayerStore.playingSong.id"
                                 class="song-item-button" 
                                 :src="musicPlayerStore.isPlaying ? pauseCircleImg : playCircleImg" 
-                                @click="musicPlayerStore.togglePlay"
+                                @click="musicPlayerStore.togglePlay()"
                             />
                             <img 
                                 v-else-if="mouseHoverIndex === index"
                                 class="song-item-button" 
-                                src="/src/assets/images/buttons-circle/play.png" 
+                                src="@/assets/images/buttons-circle/play.png" 
                                 @click="musicPlayerStore.loadSong(song.id)" 
                             />
                             <span v-else>{{ index + 1 }}</span>
                         </template>
                         <template v-if="column.key === 'title'">
-                            <img class="song-item-cover" :src="song.cover || defaultCoverImg" />
+                            <img class="song-item-cover" :src="song.cover as string ?? defaultCoverImg" />
                             <div class="song-item-info">
                                 {{ song.title }}<br />
                                 <div class="column-small-font">{{ song.artist }}</div>
@@ -371,7 +375,7 @@ onMounted(() => {
 .input-frame {
     width: 90%;
     height: 8%;
-    background-image: url("/src/assets/images/buttons/search.png");
+    background-image: url("@/assets/images/buttons/search.png");
 }
 
 .song-list {

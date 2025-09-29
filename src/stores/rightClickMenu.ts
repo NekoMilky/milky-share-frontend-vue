@@ -1,11 +1,17 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import type { RightClickMenu } from "@/types";
 
-export const useRightClickMenu = defineStore("RightClickMenu", () => {
+interface Point2D {
+    x: number,
+    y: number
+};
+
+export const useRightClickMenu = defineStore("rightClickMenu", () => {
     // 加载菜单项
-    const menus = ref([]);
-    const pos = ref({ x: 0, y: 0 });
-    const loadMenu = (mouseEvent, menusVal) => {
+    const menus = ref<Array<RightClickMenu>>([]);
+    const pos = ref<Point2D>({ x: 0, y: 0 });
+    const loadMenu = (mouseEvent: MouseEvent, menusVal: Array<RightClickMenu>) => {
         pos.value = { x: mouseEvent.clientX, y: mouseEvent.clientY };
         menus.value = menusVal;
         open();
@@ -19,19 +25,12 @@ export const useRightClickMenu = defineStore("RightClickMenu", () => {
     const close = () => {
         isOpened.value = false;
     };
-    const click = (index) => {
-        close();
-        if (menus.value[index].onClick) {
-            menus.value[index].onClick();
-        }
-    };
 
     return {
         menus,
         pos,
         isOpened,
         loadMenu,
-        close,
-        click
+        close
     };
 });

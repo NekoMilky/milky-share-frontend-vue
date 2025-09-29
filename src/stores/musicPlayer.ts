@@ -1,26 +1,27 @@
 import { defineStore } from "pinia";
 import { ref, computed, onMounted } from "vue";
-import { get } from "/src/api/Song";
-import { useSongList } from "/src/stores/SongList";
-import { checkEmptyField } from "/src/utils/Utility";
-import { isSuccessWithToast } from "/src/utils/Utility";
+import type { JSONObject, Song } from "@/types";
+import { get } from "@/api/song";
+import { useSongList } from "./songList";
+import { checkEmptyField, isSuccessWithToast } from "@/utils";
 
-export const useMusicPlayer = defineStore("MusicPlayer", () => {
+export const useMusicPlayer = defineStore("musicPlayer", () => {
     const songListStore = useSongList();
 
     // 当前播放音乐
-    const audio = ref(null);
-    const isAudioLoaded = ref(false);
-    const emptySong = () => ({
+    const audio = ref<HTMLAudioElement | null>(null);
+    const isAudioLoaded = ref<boolean>(false);
+    const emptySong = (): Song => ({
         id: "",
         title: "未播放",
         artist: "",
         album: "",
+        duration: 0,
         url: "",
         cover: null,
     });
-    const playingSong = ref(emptySong());
-    const clearSong = () => {
+    const playingSong = ref<Song>(emptySong());
+    const clearSong = (): void => {
         // 移除dom
         if (audio.value) {
             audio.value.pause();
@@ -33,9 +34,13 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         playingSong.value = emptySong();
         currentTime.value = 0;
         duration.value = 0;
+        updateCoverAnimation();
     };
-    const isLoading = ref(false);
-    const loadSong = async (songId, autoPlay = true) => {
+    const isLoading = ref<boolean>(false);
+    const loadSong = async (
+        songId: string, 
+        autoPlay: boolean = true
+    ): Promise<boolean> => {
         if (!checkEmptyField(songId, "歌曲id")) {
             return false;
         }
@@ -46,9 +51,9 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
             isLoading.value = false;
             return false;
         }
-        playingSong.value = { ...playingSong.value, ...response.data.song };
+        playingSong.value = { ...playingSong.value, ...response.data?.song as JSONObject };
         // 创建audio元素
-        await createAudioElement(playingSong.value.url);
+        await createAudioElement(playingSong.value.url as string);
         // 自动播放
         if (autoPlay) {
             togglePlay();
@@ -56,10 +61,10 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         isLoading.value = false;
         return true;
     };
-    const createAudioElement = async (url) => {
+    const createAudioElement = async (url: string): Promise<void> => {
         audio.value = new Audio(url);
-        await new Promise((resolve) => {
-            audio.value.addEventListener("canplay", () => {
+        await new Promise<void>((resolve) => {
+            audio.value?.addEventListener("canplay", () => {
                 resolve();
             });
         });
@@ -68,14 +73,14 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
     }
 
     // 播放/暂停
-    const isPlaying = ref(false);
-    const currentTime = ref(0);
-    const duration = ref(0);
-    const progress = computed(() => {
+    const isPlaying = ref<boolean>(false);
+    const currentTime = ref<number>(0);
+    const duration = ref<number>(0);
+    const progress = computed<number>(() => {
         return duration.value > 0 ? currentTime.value / duration.value * 100 : 0;
     });
-    const togglePlay = () => {
-        if (!isAudioLoaded.value) {
+    const togglePlay = (): void => {
+        if (!isAudioLoaded.value || !audio.value) {
             return;
         }
         isPlaying.value = !isPlaying.value;
@@ -87,29 +92,33 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
             audio.value.pause();
         }
     };
-    const updateProgress = () => {
-        if (!isAudioLoaded.value) {
+    const updateProgress = (): void => {
+        if (!isAudioLoaded.value || !audio.value) {
             return;
         }
-        currentTime.value = audio.value.currentTime;
-        duration.value = audio.value.duration;
+        currentTime.value = audio.value.currentTime ?? 0;
+        duration.value = audio.value.duration ?? 0;
         // 播放结束
         if (duration.value > 0 && currentTime.value >= duration.value - 0.1) {
             switchPlay(false);
         }
     };
-    const setCurrentTime = (value) => {
-        if (isAudioLoaded.value && value >= 0 && value < duration.value) {
-            audio.value.currentTime = value;
-            updateProgress();
-            if (!isPlaying.value) {
-                updateCoverAnimation();
-            }
+    const setCurrentTime = (value: number): void => {
+        if (!isAudioLoaded.value || !audio.value) {
+            return;
+        }
+        if (value < 0 || value >= duration.value) {
+            return;
+        }
+        audio.value.currentTime = value;
+        updateProgress();
+        if (!isPlaying.value) {
+            updateCoverAnimation();
         }
     };
 
     // 上一首/下一首
-    const switchPlay = (isPrevious = false) => {
+    const switchPlay = (isPrevious: boolean = false): void => {
         if (!isAudioLoaded.value) {
             return;
         }
@@ -125,15 +134,18 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
         else if (index > length - 1) {
             index = 0;
         }
-        loadSong(songListStore.songList[index].id);
+        const song = songListStore.songList[index];
+        if (song) {
+            loadSong(song.id);
+        }
     };
 
     // 封面旋转
-    const coverRotation = ref(0);
-    let coverAnimationId = null;
-    const updateCoverAnimation = () => {
+    const coverRotation = ref<number>(0);
+    let coverAnimationId: number | null = null;
+    const updateCoverAnimation = (): void => {
         coverAnimationId = requestAnimationFrame(() => {
-            if (!isAudioLoaded.value) {
+            if (!isAudioLoaded.value || !audio.value) {
                 coverRotation.value = 0;
                 return;
             }
@@ -141,18 +153,18 @@ export const useMusicPlayer = defineStore("MusicPlayer", () => {
             if (isPlaying.value) {
                 updateCoverAnimation();
             }
-            else {
+            else if (coverAnimationId) {
                 cancelAnimationFrame(coverAnimationId);
             }
         });
     }
 
     // 初始化
-    onMounted(async () => {
+    onMounted(async (): Promise<void> => {
         // 恢复播放进度
         if (playingSong.value.id) {
             const current = currentTime.value;
-            if (await loadSong(playingSong.value.id, false)) {
+            if (await loadSong(playingSong.value.id, false) && audio.value) {
                 audio.value.currentTime = current;
                 updateProgress();
                 updateCoverAnimation();

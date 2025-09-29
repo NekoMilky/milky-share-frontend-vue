@@ -1,24 +1,31 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
-import { checkEmptyField } from "/src/utils/Utility";
-import { compressImage } from "/src/utils/Convert";
-import { useUser } from "/src/stores/User";
+import { isSuccessWithToast, compressImage } from "@/utils";
+import { useUser } from "@/stores/user";
 
-import defaultAvatarImg from "/src/assets/images/default/avatar.png";
+import defaultAvatarImg from "@/assets/images/default/avatar.png";
 
 const userStore = useUser();
 
 // 处理头像选择
-const avatarInput = ref(null);
-const selectFiles = async (files) => {
-    if (!checkEmptyField(files, "头像文件")) {
+const avatarInput = ref<HTMLInputElement | null>(null);
+const selectFiles = async (files: FileList | null | undefined): Promise<void> => {
+    if (!files) {
+        isSuccessWithToast({ message: "请选择文件", success: false });
         return;
     }
     const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
     if (imageFiles.length === 0) {
+        isSuccessWithToast({ message: "请选择图像文件", success: false });
         return;
     }
-    userStore.userSaveProfile(await compressImage(imageFiles[0]));
+    const avatar = imageFiles[0];
+    if (avatar) {
+        userStore.userSaveProfile(await compressImage(avatar));
+    }
+};
+const checkInputEvent = (event: InputEvent): void => {
+    selectFiles((event.target as HTMLInputElement).files);
 };
 </script>
 
@@ -28,14 +35,14 @@ const selectFiles = async (files) => {
             <img 
                 class="avatar" 
                 :src="userStore.user.avatar || defaultAvatarImg" 
-                @click="avatarInput.click"
+                @click="avatarInput?.click()"
             />
             <input 
                 type="file" 
                 ref="avatarInput" 
                 accept="image/*" 
                 style="display: none;"
-                @change="selectFiles($event.target.files)" 
+                @change="checkInputEvent($event as InputEvent)" 
             />
             <div class="info-list">
                 <div class="info">
@@ -51,7 +58,7 @@ const selectFiles = async (files) => {
             </div>
         </div>
         <div class="button-list">
-            <div class="button danger" @click="userStore.userLogout">退出登录</div>
+            <div class="button danger" @click="userStore.userLogout()">退出登录</div>
         </div>
     </div>
 </template>

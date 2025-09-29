@@ -1,7 +1,8 @@
-<script setup>
-import { usePlaylist } from "/src/stores/Playlist";
+<script setup lang="ts">
+import type { Playlist } from "@/types";
+import { usePlaylist } from "@/stores/playlist";
 
-import defaultCoverImg from "/src/assets/images/default/cover.png";
+import defaultCoverImg from "@/assets/images/default/cover.png";
 
 const playlistStore = usePlaylist();
 
@@ -11,7 +12,7 @@ const props = defineProps({
         default: ""
     },
     list: {
-        type: Array,
+        type: Array<Playlist>,
         default: []
     },
     button: {
@@ -44,7 +45,7 @@ const props = defineProps({
                 :key="index"
                 @click="playlistStore.viewPlaylist(playlist.id)"
             >
-                <img class="cover" :src="playlist.cover || defaultCoverImg" />
+                <img class="cover" :src="playlist.cover ?? defaultCoverImg" />
                 {{ playlist.name }}
             </div>
         </div>

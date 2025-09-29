@@ -1,8 +1,8 @@
-<script setup>
-import { useUser } from "/src/stores/User";
-import MusicPlayer from "/src/components/common/MusicPlayer.vue";
-import Profile from "/src/components/page/profile/Profile.vue";
-import Login from "/src/components/page/profile/Login.vue";
+<script setup lang="ts">
+import { useUser } from "@/stores/user";
+import MusicPlayer from "@/components/common/MusicPlayer.vue";
+import Profile from "@/components/page/profile/Profile.vue";
+import Login from "@/components/page/profile/Login.vue";
 
 const userStore = useUser();
 </script>

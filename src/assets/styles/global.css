@@ -13,7 +13,7 @@
 
 @font-face {
     font-family: "Aa小迷糊少女"; 
-    src: url("/src/assets/fonts/font.ttf") format("truetype"); 
+    src: url("@/assets/fonts/font.ttf") format("truetype"); 
 }
 
 body {
@@ -21,7 +21,7 @@ body {
     overflow: hidden;
     margin: 0;
     padding: 0;
-    background-image: url("/src/assets/images/background.png");
+    background-image: url("@/assets/images/background.png");
     background-size: cover;
     background-repeat: no-repeat;
 }

@@ -1,28 +1,29 @@
 import { defineStore } from "pinia";
 import { computed, onMounted, ref } from "vue";
-import { isSuccessWithToast, checkEmptyField, hasObjectChanges } from "/src/utils/Utility";
-import { login, register, get, saveProfile } from "/src/api/User";
-import { useTagSelector } from "/src/stores/TagSelector";
-import { useDialog } from "/src/stores/Dialog";
-import { usePlaylist } from "/src/stores/Playlist";
+import type { ApiResponse, JSONObject, User } from "@/types";
+import { isSuccessWithToast, checkEmptyField, hasObjectChanges } from "@/utils";
+import { login, register, get, saveProfile } from "@/api/user";
+import { useTagSelector } from "./tagSelector";
+import { useDialog } from "./dialog";
+import { usePlaylist } from "./playlist";
 
-export const useUser = defineStore("User", () => {
+export const useUser = defineStore("user", () => {
     const tagStore = useTagSelector();
     const dialogStore = useDialog();
     const playlistStore = usePlaylist();
 
     // 当前登录用户
-    const emptyUser = () => ({
+    const emptyUser = (): User => ({
         id: "",
         nickname: "",
         avatar: null
     });
-    const user = ref(emptyUser());
-    const userOrigin = ref({});
-    const isLogged = computed(() => {
-        return user.value.id;
+    const user = ref<User>(emptyUser());
+    const userOrigin = ref<JSONObject>({});
+    const isLogged = computed<boolean>(() => {
+        return user.value.id ? true : false;
     });
-    const updateProfile = async () => {
+    const updateProfile = async (): Promise<void> => {
         if (!isLogged.value) {
             user.value = emptyUser();
             tagStore.checkBanned();
@@ -34,7 +35,7 @@ export const useUser = defineStore("User", () => {
             tagStore.checkBanned();
             return;
         }
-        user.value = response.data.user;
+        user.value = response.data?.user as User;
         userOrigin.value = { nickname: user.value.nickname };
         console.log("已更新个人档案");
         // 更新歌单列表
@@ -42,32 +43,32 @@ export const useUser = defineStore("User", () => {
     };
 
     // 注册、登录与退出登录
-    const handleResponse = (response) => {
+    const handleResponse = (response: ApiResponse): void => {
         if (!isSuccessWithToast(response)) {
             return;
         }
-        user.value.id = response.data.user.id;
+        user.value.id = (response.data?.user as User).id;
         updateProfile();
     };
-    const userRegister = async (nickname, password) => {
+    const userRegister = async (nickname: string, password: string): Promise<void> => {
         handleResponse(await register(nickname, password));
     };
-    const userLogin = async (nickname, password) => {
+    const userLogin = async (nickname: string, password: string): Promise<void> => {
         handleResponse(await login(nickname, password));
     };
-    const userLogout = () => {
+    const userLogout = (): void => {
         dialogStore.loadDialog([
             { key: "title", type: "text", text: "退出登录确认" }
         ], confirmUserLogout);
     };
-    const confirmUserLogout = () => {
+    const confirmUserLogout = (): void => {
         user.value = emptyUser();
         updateProfile();
     };
 
     // 保存档案，包含状态锁
-    const isSavingProfile = ref(false);
-    const userSaveProfile = async (avatarFile = null) => {
+    const isSavingProfile = ref<boolean>(false);
+    const userSaveProfile = async (avatarFile: File | null = null): Promise<void> => {
         if (isSavingProfile.value) {
             return;
         }

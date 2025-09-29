@@ -1,43 +1,85 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
-import { timeFormat, isSuccessWithToast, checkEmptyField, checkEmptyFields } from "/src/utils/Utility";
-import { useSongList } from "/src/stores/SongList";
-import jsmediatags from "jsmediatags/dist/jsmediatags.min";
+import type { Song } from "@/types"
+import { compressImage, toURI, timeFormat, isSuccessWithToast, checkEmptyFields } from "@/utils";
+import { useSongList } from "@/stores/songList";
+import { parseBlob } from "music-metadata";
 
-import defaultCoverImg from "/src/assets/images/default/cover.png";
+import defaultCoverImg from "@/assets/images/default/cover.png";
 
-const fileInput = ref(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const songListStore = useSongList();
 
 // 处理文件选择
-const selectedFile = ref(null);
-const selectFiles = (files) => {
-    if (!checkEmptyField(files, "音频文件")) {
+const selectedFile = ref<File | null>(null);
+const selectFiles = (files: FileList | null | undefined): void => {
+    if (!files) {
+        isSuccessWithToast({ message: "请选择文件", success: false });
         return;
     }
     const audioFiles = Array.from(files).filter((file) => file.type.startsWith("audio/"));
     if (audioFiles.length === 0) {
+        isSuccessWithToast({ message: "请选择音频文件", success: false });
         return;
     }
-    selectedFile.value = audioFiles[0];
+    selectedFile.value = audioFiles[0] ?? null;
     updateSongInfo();
 };
-const onDrop = (event) => {
-    event.preventDefault();
-    selectFiles(event.dataTransfer.files);
+const checkInputEvent = (event: InputEvent): void => {
+    selectFiles((event.target as HTMLInputElement).files);
 };
-const onDragOver = (event) => {
+const onDrop = (event: DragEvent): void => {
+    event.preventDefault();
+    selectFiles(event.dataTransfer?.files);
+};
+const onDragOver = (event: DragEvent): void => {
     event.preventDefault();
 };
-const clearSelectedFile = () => {
+const clearSelectedFile = (): void => {
     selectedFile.value = null;
     isUploading.value = false;
 }
 
+// 显示信息
+const emptySongInfo = (): Song => ({
+    id: "",
+    title: "",
+    artist: "",
+    album: "",
+    duration: 0,
+    cover: null
+});
+const songInfo = ref<Song>(emptySongInfo());
+const updateSongInfo = async (): Promise<void> => {
+    if (!selectedFile.value) {
+        isSuccessWithToast({ message: "没有上传音频文件", success: false });
+        return;
+    }
+    songInfo.value = emptySongInfo();
+    // 解析基础信息
+    try {
+        const metadata = await parseBlob(selectedFile.value, { duration: true });
+        const { title, artist, album, picture } = metadata.common;
+        const duration = metadata.format.duration;
+        songInfo.value = {
+            id: "",
+            title: title ?? "",
+            artist: artist ?? "",
+            album: album ?? "",
+            duration: duration ?? 0,
+            cover: picture?.[0] ? await compressImage(picture[0]) : null,
+            coverDisplay: picture?.[0] ? toURI(picture[0]) : null
+        };
+    }
+    catch (error) {
+        isSuccessWithToast({ message: "解析音频元数据时出错", success: false });
+    }
+}
+
 // 处理文件上传
-const isUploading = ref(false);
-const uploadFile = async () => {
+const isUploading = ref<boolean>(false);
+const uploadFile = async (): Promise<void> => {
     if (!selectedFile.value) {
         isSuccessWithToast({ message: "没有上传音频文件", success: false });
         return;
@@ -52,99 +94,6 @@ const uploadFile = async () => {
     // 上传结束
     clearSelectedFile();
 };
-
-// 显示信息
-const emptySongInfo = () => ({
-    title: "",
-    artist: "",
-    album: "",
-    duration: 0,
-    cover: null,
-    coverDisplay: null
-});
-const songInfo = ref(emptySongInfo());
-const updateSongInfo = () => {
-    if (!selectedFile.value) {
-        isSuccessWithToast({ message: "没有上传音频文件", success: false });
-        return;
-    }
-    songInfo.value = emptySongInfo();
-    // 解析基础信息
-    jsmediatags.read(selectedFile.value, {
-        onSuccess: async (tag) => {
-            const tags = tag.tags;
-            songInfo.value = { ...songInfo.value, ...tags };
-            const cover = tags.picture;
-            if (cover) {
-                songInfo.value.cover = await objectToFile(cover);
-                songInfo.value.coverDisplay = objectToURI(cover);
-            }
-        },
-        onError: (error) => {
-            isSuccessWithToast({ message: "解析音频文件元数据时出错", success: false, error: error });
-        }
-    });
-    // 解析时长
-    const fileUrl = URL.createObjectURL(selectedFile.value);
-    const audioElement = new Audio(fileUrl);
-    audioElement.addEventListener("loadedmetadata", () => {
-        songInfo.value.duration = audioElement.duration;
-        URL.revokeObjectURL(fileUrl);
-    });
-}
-const objectToURI = (object) => {
-    try {
-        const byteArray = new Uint8Array(object.data);
-        let binary = "";
-        for (let i = 0; i < byteArray.byteLength; i++) {
-            binary += String.fromCharCode(byteArray[i]);
-        }
-        const base64 = window.btoa(binary);
-        return `data:${object.format};base64,${base64}`;
-    }
-    catch (error) {
-        isSuccessWithToast({ message: "无法将对象转为URI", success: false, error: error });
-        return null;
-    }
-};
-const objectToFile = async (object, maxSize = 256) => {
-    try {
-        // 读取为blob
-        const format = object.format;
-        const byteArray = new Uint8Array(object.data);
-        const blob = new Blob([byteArray], { type: format });
-        // 转为image
-        const imgUrl = URL.createObjectURL(blob);
-        const img = await new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onload = () => resolve(image);
-            image.onerror = reject;
-            image.src = imgUrl;
-        });
-        // 用canvas压缩
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        let { width, height } = img;
-        const scale = Math.min(maxSize / width, maxSize / height);
-        if (scale < 1) {
-            width = Math.round(width * scale);
-            height = Math.round(height * scale);
-        }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        // 转为blob
-        const blobCompressed = await new Promise((resolve) =>
-            canvas.toBlob(resolve, format, 0.5)
-        );
-        const filePostfix = format.split("/")[1] || "jpeg";
-        return new File([blobCompressed], `file.${filePostfix}`, { type: format });
-    }
-    catch (error) {
-        isSuccessWithToast({ message: "无法将对象转为File对象", success: false, error: error });
-        return null;
-    }
-};
 </script>
 
 <template>
@@ -154,14 +103,14 @@ const objectToFile = async (object, maxSize = 256) => {
             class="upload-area" 
             @drop="onDrop" 
             @dragover="onDragOver" 
-            @click="fileInput.click"
+            @click="fileInput?.click()"
         >
             <input 
                 type="file" 
                 ref="fileInput" 
                 accept="audio/*" 
                 style="display: none;"
-                @change="selectFiles($event.target.files)" 
+                @change="checkInputEvent($event as InputEvent)" 
             />
             点击选择音频文件，或拖拽文件到这里
         </div>
@@ -203,13 +152,11 @@ const objectToFile = async (object, maxSize = 256) => {
                 </div>
             </div>
             <div class="button-list">
-                <img class="button" src="/src/assets/images/buttons/return.png" @click="clearSelectedFile" />
-                <img class="button" src="/src/assets/images/buttons/upload.png" @click="uploadFile" />
+                <img class="button" src="@/assets/images/buttons/return.png" @click="clearSelectedFile()" />
+                <img class="button" src="@/assets/images/buttons/upload.png" @click="uploadFile()" />
             </div>
         </div>
-        <div v-else class="song-uploading">
-            文件上传中，请稍候
-        </div>
+        <div v-else class="song-uploading">文件上传中，请稍候</div>
     </div>
 </template>
 

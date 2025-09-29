@@ -1,25 +1,32 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
-import { dateFormat, checkEmptyField } from "/src/utils/Utility";
-import { compressImage } from "/src/utils/Convert";
-import { usePlaylist } from "/src/stores/Playlist";
+import { dateFormat, isSuccessWithToast, compressImage } from "@/utils";
+import { usePlaylist } from "@/stores/playlist";
 
-import defaultCoverImg from "/src/assets/images/default/cover.png";
-import defaultAvatarImg from "/src/assets/images/default/avatar.png";
+import defaultCoverImg from "@/assets/images/default/cover.png";
+import defaultAvatarImg from "@/assets/images/default/avatar.png";
 
 const playlistStore = usePlaylist();
 
 // 处理封面选择
-const coverInput = ref(null);
-const selectFiles = async (files) => {
-    if (!checkEmptyField(files, "封面文件")) {
+const coverInput = ref<HTMLInputElement | null>(null);
+const selectFiles = async (files: FileList | null | undefined): Promise<void> => {
+    if (!files) {
+        isSuccessWithToast({ message: "请选择文件", success: false });
         return;
     }
     const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
     if (imageFiles.length === 0) {
+        isSuccessWithToast({ message: "请选择图像文件", success: false });
         return;
     }
-    playlistStore.saveViewingPlaylistInfo(await compressImage(imageFiles[0]));
+    const cover = imageFiles[0];
+    if (cover) {
+        playlistStore.saveViewingPlaylistInfo(await compressImage(cover));
+    }
+};
+const checkInputEvent = (event: InputEvent): void => {
+    selectFiles((event.target as HTMLInputElement).files);
 };
 </script>
 
@@ -30,19 +37,19 @@ const selectFiles = async (files) => {
             <template v-if="playlistStore.isViewingPlaylistEditable">
                 <img 
                     class="cover cover-modify" 
-                    :src="playlistStore.viewingPlaylist.cover || defaultCoverImg" 
-                    @click="coverInput.click"
+                    :src="playlistStore.viewingPlaylist.cover ?? defaultCoverImg" 
+                    @click="coverInput?.click()"
                 />
                 <input 
                     type="file" 
                     ref="coverInput" 
                     accept="image/*" 
                     style="display: none;"
-                    @change="selectFiles($event.target.files)" 
+                    @change="checkInputEvent($event as InputEvent)" 
                 />
             </template>
             <template v-else>
-                <img class="cover" :src="playlistStore.viewingPlaylist.cover || defaultCoverImg" />
+                <img class="cover" :src="playlistStore.viewingPlaylist.cover ?? defaultCoverImg" />
             </template>
         </div>
         <div class="playlist-info">
@@ -61,11 +68,11 @@ const selectFiles = async (files) => {
             </template>
             <div class="playlist-create">
                 <div class="cell">
-                    <img class="avatar" :src="playlistStore.viewingPlaylist.create_user.avatar || defaultAvatarImg" />
-                    {{ playlistStore.viewingPlaylist.create_user.nickname }}
+                    <img class="avatar" :src="playlistStore.viewingPlaylist.createUser?.avatar ?? defaultAvatarImg" />
+                    {{ playlistStore.viewingPlaylist.createUser?.nickname }}
                 </div>
                 <div class="cell">
-                    {{ `${dateFormat(playlistStore.viewingPlaylist.create_time)}创建` }}
+                    {{ `${dateFormat(playlistStore.viewingPlaylist.createTime ?? '')}创建` }}
                 </div>
             </div>
         </div>

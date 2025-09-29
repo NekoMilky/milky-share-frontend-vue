@@ -1,5 +1,5 @@
-<script setup>
-import { useDialog } from "/src/stores/Dialog";
+<script setup lang="ts">
+import { useDialog } from "@/stores/dialog";
 
 const dialogStore = useDialog();
 </script>
@@ -17,7 +17,7 @@ const dialogStore = useDialog();
                     >
                         <template v-if="row.type === 'text'">{{ row.text }}</template>
                         <template v-if="row.type === 'input'">
-                            <template v-if="row.input.type === 'text'">
+                            <template v-if="row.input?.type === 'text'">
                                 <div class="input-label text-input-label">{{ row.input.label }}</div>
                                 <input 
                                     v-model="dialogStore.values[row.key]" 
@@ -26,12 +26,11 @@ const dialogStore = useDialog();
                                     :placeholder="row.input.placeholder"
                                 />
                             </template>
-                            <template v-else-if="row.input.type === 'checkbox'">
+                            <template v-else-if="row.input?.type === 'checkbox'">
                                 <input 
                                     v-model="dialogStore.values[row.key]" 
                                     type="checkbox"
-                                    class="checkbox-input" 
-                                    :placeholder="row.input.placeholder"
+                                    class="checkbox-input"
                                 />
                                 <div class="input-label checkbox-input-label">{{ row.input.label }}</div>
                             </template>
@@ -39,11 +38,11 @@ const dialogStore = useDialog();
                     </div>
                 </div>
                 <div class="row button" v-if="dialogStore.confirmAction" @click="dialogStore.submitDialog">
-                    <img class="button-icon" src="/src/assets/images/buttons/confirm.png" />
+                    <img class="button-icon" src="@/assets/images/buttons/confirm.png" />
                     确认
                 </div>
                 <div class="row button" @click="dialogStore.close">
-                    <img class="button-icon" src="/src/assets/images/buttons/cancel.png" />
+                    <img class="button-icon" src="@/assets/images/buttons/cancel.png" />
                     取消
                 </div>
             </div>

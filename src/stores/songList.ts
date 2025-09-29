@@ -1,33 +1,34 @@
 import { defineStore } from "pinia";
 import { ref, onMounted } from "vue";
-import { isSuccessWithToast, checkEmptyField, checkEmptyFields } from "/src/utils/Utility";
-import { getAll, getAllByPlaylist, getPlaylistBySong, applyStarSong, upload, remove } from "/src/api/Song";
-import { useDialog } from "/src/stores/Dialog";
-import { useUser } from "/src/stores/User";
-import { useMusicPlayer } from "/src/stores/MusicPlayer";
-import { usePlaylist } from "/src/stores/Playlist";
+import type { JSONObject, DialogRow, Playlist, Song } from "@/types";
+import { isSuccessWithToast, checkEmptyField, checkEmptyFields } from "@/utils";
+import { getAll, getAllByPlaylist, getPlaylistBySong, applyStarSong, upload, remove } from "@/api/song";
+import { useDialog } from "./dialog";
+import { useUser } from "./user";
+import { useMusicPlayer } from "./musicPlayer";
+import { usePlaylist } from "./playlist";
 
-export const useSongList = defineStore("SongList", () => {
+export const useSongList = defineStore("songList", () => {
     const dialogStore = useDialog();
     const userStore = useUser();
     const musicPlayerStore = useMusicPlayer();
     const playlistStore = usePlaylist();
 
     // 总列表
-    const songList = ref([]);
-    const updateSongList = async () => {
+    const songList = ref<Array<Song>>([]);
+    const updateSongList = async (): Promise<void> => {
         const response = await getAll();
         if (!isSuccessWithToast(response, true)) {
             songList.value = [];
             return;
         }
-        songList.value = response.data.songs;
+        songList.value = response.data?.songs as Array<Song>;
         console.log("已更新歌曲列表");
     };
 
     // 当前查看歌单的歌曲列表
-    const viewingSongList = ref([]);
-    const updateViewingSongList = async (playlistId) => {
+    const viewingSongList = ref<Array<Song>>([]);
+    const updateViewingSongList = async (playlistId: string): Promise<void> => {
         if (!playlistId) {
             return;
         }
@@ -36,12 +37,15 @@ export const useSongList = defineStore("SongList", () => {
             viewingSongList.value = [];
             return;
         }
-        viewingSongList.value = response.data.songs;
+        viewingSongList.value = response.data?.songs as Array<Song>;
         console.log("已更新歌单的歌曲列表");
     };
 
     // 上传歌曲
-    const uploadSong = async (file, info) => {
+    const uploadSong = async (
+        file: File, 
+        info: Song
+    ): Promise<void> => {
         if (!userStore.isLogged) {
             isSuccessWithToast({ message: "游客无法使用上传功能", success: false });
             return;
@@ -57,7 +61,7 @@ export const useSongList = defineStore("SongList", () => {
     };
 
     // 删除歌曲
-    const removeSong = (songId, songTitle) => {
+    const removeSong = (songId: string, songTitle: string): void => {
         if (!userStore.isLogged) {
             isSuccessWithToast({ message: "游客无法删除歌曲", success: false });
             return;
@@ -74,8 +78,8 @@ export const useSongList = defineStore("SongList", () => {
             { key: "songId", value: songId }
         ]);
     };
-    const confirmRemoveSong = async (values) => {
-        const response = await remove(values.userId, values.songId);
+    const confirmRemoveSong = async (values: JSONObject): Promise<void> => {
+        const response = await remove(values.userId as string, values.songId as string);
         if (!isSuccessWithToast(response)) {
             return;
         }
@@ -83,10 +87,11 @@ export const useSongList = defineStore("SongList", () => {
             musicPlayerStore.clearSong();
         }
         updateSongList();
+        updateViewingSongList(playlistStore.viewingPlaylist.id);
     };
 
     // 收藏歌曲
-    const starSong = async (songId) => {
+    const starSong = async (songId: string): Promise<void> => {
         if (!userStore.isLogged) {
             isSuccessWithToast({ message: "游客无法收藏歌曲", success: false });
             return;
@@ -98,8 +103,8 @@ export const useSongList = defineStore("SongList", () => {
         if (!isSuccessWithToast(response, true)) {
             return;
         }
-        let rows = [{ key: "title", type: "text", text: "收藏歌曲" }];
-        response.data.playlists.forEach((playlist) => {
+        let rows: Array<DialogRow> = [{ key: "title", type: "text", text: "收藏歌曲" }];
+        (response.data?.playlists as Array<Playlist>).forEach((playlist: Playlist) => {
             rows.push({ 
                 key: playlist.id, 
                 type: "input", 
@@ -107,7 +112,7 @@ export const useSongList = defineStore("SongList", () => {
                     required: true, 
                     type: "checkbox", 
                     label: playlist.name, 
-                    value: playlist.hasStared
+                    value: playlist.hasStared as boolean
                 }
             });
         });
@@ -116,9 +121,9 @@ export const useSongList = defineStore("SongList", () => {
             { key: "songId", value: songId }
         ]);
     };
-    const confirmStarSong = async (values) => {
+    const confirmStarSong = async (values: JSONObject): Promise<void> => {
         const { userId, songId, ...starInfo } = values;
-        const response = await applyStarSong(userId, songId, starInfo);
+        const response = await applyStarSong(userId as string, songId as string, starInfo);
         if (!isSuccessWithToast(response)) {
             return;
         }

@@ -4,6 +4,6 @@ const WEBSOCKET_URL = config.WEBSOCKET_URL;
 export const ws = new WebSocket(WEBSOCKET_URL);
 
 // 错误处理
-ws.onerror = (error) => {
+ws.onerror = (error: Event): void => {
     console.error("WebSocket错误：", error);
 };

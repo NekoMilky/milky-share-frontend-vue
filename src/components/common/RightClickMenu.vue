@@ -1,19 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { useRightClickMenu } from "/src/stores/RightClickMenu";
+import { useRightClickMenu } from "@/stores/rightClickMenu";
 
 const rightClickMenuStore = useRightClickMenu();
 
 // 点击越界处理
-const menuBox = ref(null);
-const handleClickOutside = (event) => {
-    if (menuBox.value && rightClickMenuStore.isOpened && !menuBox.value.contains(event.target)) {
+const menuBox = ref<HTMLDivElement | null>(null);
+const handleClickOutside = (event: MouseEvent): void => {
+    if (menuBox.value && rightClickMenuStore.isOpened && !menuBox.value?.contains(event.target as Node)) {
         rightClickMenuStore.close();
     }
 };
 
 // 菜单位置修正
-const adjustMenuPos = async () => {
+const adjustMenuPos = async (): Promise<void> => {
     await nextTick(); 
     if (!menuBox.value) { 
         return;
@@ -22,12 +22,12 @@ const adjustMenuPos = async () => {
     const menuWidth = menuBox.value.offsetWidth;
     const menuHeight = menuBox.value.offsetHeight;
     // 超出视口右侧
-    if (x + menuWidth > window.innerWidth) {
-        rightClickMenuStore.pos.x = x - menuWidth;
+    if (x as number + menuWidth > window.innerWidth) {
+        rightClickMenuStore.pos.x = x as number - menuWidth;
     }
     // 超出视口底部
-    if (y + menuHeight > window.innerHeight) {
-        rightClickMenuStore.pos.y = y - menuHeight;
+    if (y as number + menuHeight > window.innerHeight) {
+        rightClickMenuStore.pos.y = y as number - menuHeight;
     }
 };
 watch(() => [rightClickMenuStore.isOpened, rightClickMenuStore.pos], () => {
@@ -60,7 +60,7 @@ onMounted(() => {
                 v-for="(menu, index) in rightClickMenuStore.menus"
                 :key="menu.key"
                 :class="{ 'danger': menu.danger }"
-                @click="rightClickMenuStore.click(index)"
+                @click="menu.onClick()"
             >
                 <img class="menu-icon" :src="menu.iconSrc" />
                 {{ menu.label }}

@@ -1,8 +1,8 @@
-<script setup>
-import { useToast } from "/src/stores/Toast";
+<script setup lang="ts">
+import { useToast } from "@/stores/toast";
 
-import confirmImg from "/src/assets/images/buttons/confirm.png";
-import cancelImg from "/src/assets/images/buttons/cancel.png";
+import confirmImg from "@/assets/images/buttons/confirm.png";
+import cancelImg from "@/assets/images/buttons/cancel.png";
 
 const toastStore = useToast();
 </script>

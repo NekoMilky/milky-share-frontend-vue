@@ -1,20 +1,21 @@
-<script setup>
-import { useSongList } from "/src/stores/SongList";
-import { usePlaylist } from "/src/stores/Playlist";
-import MusicPlayer from "/src/components/common/MusicPlayer.vue";
-import SongList from "/src/components/common/SongList.vue";
-import Selector from "/src/components/page/playlist/Selector.vue";
-import PlaylistInfo from "/src/components/page/playlist/PlaylistInfo.vue";
+<script setup lang="ts">
+import type { Song, SongListColumn } from "@/types";
+import { useSongList } from "@/stores/songList";
+import { usePlaylist } from "@/stores/playlist";
+import MusicPlayer from "@/components/common/MusicPlayer.vue";
+import SongList from "@/components/common/SongList.vue";
+import Selector from "@/components/page/playlist/Selector.vue";
+import PlaylistInfo from "@/components/page/playlist/PlaylistInfo.vue";
 
 const playlistStore = usePlaylist();
 
-const columns = [
+const columns: Array<SongListColumn> = [
     { key: "index", label: "#", sortable: false, width: 10 },
     { key: "title", label: "标题", sortable: true, width: 50 },
     { key: "album", label: "专辑", sortable: true, width: 25 },
     { key: "duration", label: "时长", sortable: true, width: 15 }
 ];
-const getList = () => {
+const getList = (): Array<Song> => {
     return useSongList().viewingSongList;
 };
 </script>

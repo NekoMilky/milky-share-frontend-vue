@@ -1,25 +1,25 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { useUser } from "/src/stores/User";
+import { useUser } from "./user";
 
-export const useTagSelector = defineStore("TagSelector", () => {
+export const useTagSelector = defineStore("tagSelector", () => {
     const userStore = useUser();
 
     // 当前选项
-    const currentTag = ref("home");
-    const bannedWhenVisitor = ["playlist", "upload"];
-    const checkBanned = () => {
+    const currentTag = ref<string>("home");
+    const bannedWhenVisitor: Array<string> = ["playlist", "upload"];
+    const checkBanned = (): void => {
         if (bannedWhenVisitor.includes(currentTag.value)) {
             selectTag("home");
         }
     };
-    const selectTag = (tag) => {
+    const selectTag = (tag: string): void => {
         if (!userStore.isLogged && bannedWhenVisitor.includes(tag)) {
             return;
         }
         currentTag.value = tag;
     };
-    const isSelected = (tag) => {
+    const isSelected = (tag: string): boolean => {
         return currentTag.value === tag;
     };
 

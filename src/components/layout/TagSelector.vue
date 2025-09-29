@@ -1,8 +1,8 @@
-<script setup>
-import { useTagSelector } from "/src/stores/TagSelector";
-import { useUser } from "/src/stores/User";
+<script setup lang="ts">
+import { useTagSelector } from "@/stores/tagSelector";
+import { useUser } from "@/stores/user";
 
-import defaultAvatarImg from "/src/assets/images/default/avatar.png";
+import defaultAvatarImg from "@/assets/images/default/avatar.png";
 
 const tagStore = useTagSelector();
 const userStore = useUser();
@@ -13,21 +13,21 @@ const userStore = useUser();
         <div class="row" @click="tagStore.selectTag('profile')" :class="{ 'row-selected': tagStore.isSelected('profile') }">
             <img 
                 class="button avatar"
-                :src="userStore.user.avatar || defaultAvatarImg"
+                :src="userStore.user.avatar ?? defaultAvatarImg"
             />
             <span v-if="userStore.isLogged">档案</span>
             <span v-else>未登录</span>
         </div>
         <div class="row" @click="tagStore.selectTag('home')" :class="{ 'row-selected': tagStore.isSelected('home') }">
-            <img class="button" src="/src/assets/images/buttons/home.png" />
+            <img class="button" src="@/assets/images/buttons/home.png" />
             <span>首页</span>
         </div>
         <div v-if="userStore.isLogged" class="row" @click="tagStore.selectTag('playlist')" :class="{ 'row-selected': tagStore.isSelected('playlist') }">
-            <img class="button" src="/src/assets/images/buttons/playlist.png" />
+            <img class="button" src="@/assets/images/buttons/playlist.png" />
             <span>歌单</span>
         </div>
         <div v-if="userStore.isLogged" class="row" @click="tagStore.selectTag('upload')" :class="{ 'row-selected': tagStore.isSelected('upload') }">
-            <img class="button" src="/src/assets/images/buttons/upload.png" />
+            <img class="button" src="@/assets/images/buttons/upload.png" />
             <span>上传</span>
         </div>
     </div>

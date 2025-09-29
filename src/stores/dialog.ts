@@ -1,20 +1,30 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { checkEmptyField } from "/src/utils/Utility";
+import type { JSONObject, DialogRow } from "@/types";
+import { checkEmptyField } from "@/utils";
 
-export const useDialog = defineStore("Dialog", () => {
+interface KeyValuePair {
+    key: string,
+    value: unknown
+};
+
+export const useDialog = defineStore("dialog", () => {
     // 加载对话框
-    const rows = ref([]);
-    const confirmAction = ref(null);
-    const values = ref({});
-    const loadDialog = (rowsVal, confirmAct = null, valList = []) => {
+    const rows = ref<Array<DialogRow>>([]);
+    const confirmAction = ref<Function | null>(null);
+    const values = ref<JSONObject>({});
+    const loadDialog = (
+        rowsVal: Array<DialogRow>, 
+        confirmAct: Function | null = null, 
+        valList: Array<KeyValuePair> = []
+    ):void => {
         values.value = {};
         rows.value = rowsVal;
         confirmAction.value = confirmAct;
         // 初始化值
         rows.value.forEach((row) => {
             if (row.type === "input") {
-                values.value[row.key] = row.input.value;
+                values.value[row.key] = row.input?.value;
             }
         });
         valList.forEach((val) => {
@@ -22,21 +32,21 @@ export const useDialog = defineStore("Dialog", () => {
         });
         // 打开对话
         open();
-    };
+    }; 
 
     // 打开/关闭对话框
-    const isOpened = ref(false);
-    const open = () => {
+    const isOpened = ref<boolean>(false);
+    const open = (): void => {
         isOpened.value = true;
     };
-    const close = () => {
+    const close = (): void => {
         isOpened.value = false;
     };
 
     // 提交
-    const submitDialog = () => {
+    const submitDialog = (): void => {
         for (const row of rows.value) {
-            if (row.type === "input" && row.input.required && !checkEmptyField(values.value[row.key], row.input.label)) {
+            if (row.type === "input" && row.input?.required && !checkEmptyField(values.value[row.key], row.input.label)) {
                 return;
             }
         }

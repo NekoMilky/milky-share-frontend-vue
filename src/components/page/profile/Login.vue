@@ -1,57 +1,57 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { checkNickname } from "/src/api/User";
-import { useUser } from "/src/stores/User";
-import { isSuccessWithToast, debouncedRef } from "/src/utils/Utility";
+import { checkNickname } from "@/api/user";
+import { useUser } from "@/stores/user";
+import { isSuccessWithToast, debouncedRef } from "@/utils";
 
 const userStore = useUser();
 
 // 标签选择
-const tag = ref("login");
-const selectTag = (value) => {
+const tag = ref<string>("login");
+const selectTag = (value: string): void => {
     if (isTag(value)) {
         return;
     }
     tag.value = value;
     clearInput();
 }
-const isTag = (value) => {
+const isTag = (value: string): boolean => {
     return tag.value === value;
 }
 
 // 接收输入
-const nickname = debouncedRef("");
-const password = debouncedRef("");
-const confirmPassword = debouncedRef("");
-const clearInput = () => {
+const nickname = debouncedRef<string>("");
+const password = debouncedRef<string>("");
+const confirmPassword = debouncedRef<string>("");
+const clearInput = (): void => {
     nickname.value = "";
     password.value = "";
     confirmPassword.value = "";
 }
 
 // 密码强度
-const hasSuitableLen = computed(() => {
+const hasSuitableLen = computed<boolean>(() => {
     return password.value.length >= 8 && password.value.length <= 24;
 });
-const hasNumber = computed(() => {
+const hasNumber = computed<boolean>(() => {
     return /\d/.test(password.value);
 });
-const hasLetter = computed(() => {
+const hasLetter = computed<boolean>(() => {
     return /[a-zA-Z]/.test(password.value);
 });
-const hasSpecialChar = computed(() => {
+const hasSpecialChar = computed<boolean>(() => {
     return /[!@#$%^&*(),.?":{}|<>]/.test(password.value);
 });
 
 // 问题实时反馈
-const isNicknameUsable = ref(true);
+const isNicknameUsable = ref<boolean>(true);
 watch(() => nickname.value, async (value) => {
     if (isTag("register") && value) {
         const response = await checkNickname(value);
-        isNicknameUsable.value = response.data.usable;
+        isNicknameUsable.value = response.data?.usable as boolean;
     }
 });
-const issue = computed(() => {
+const issue = computed<string | null>(() => {
     if (!nickname.value) {
         return "昵称不可为空";
     }
@@ -82,19 +82,19 @@ const issue = computed(() => {
 });
 
 // 注册与登录
-const checkIssue = () => {
+const checkIssue = (): boolean => {
     if (issue.value) {
         isSuccessWithToast({ message: issue.value, success: false });
     }
     return !issue.value;
 };
-const login = () => {
+const login = (): void => {
     if (!checkIssue()) {
         return;
     }
     userStore.userLogin(nickname.value, password.value);
 }
-const register = () => {
+const register = (): void => {
     if (!checkIssue()) {
         return;
     }
@@ -187,15 +187,15 @@ const register = () => {
 }
 
 .nick-input {
-    background-image: url("/src/assets/images/buttons/user.png");
+    background-image: url("@/assets/images/buttons/user.png");
 }
 
 .password-input {
-    background-image: url("/src/assets/images/buttons/password.png");
+    background-image: url("@/assets/images/buttons/password.png");
 }
 
 .confirm-input {
-    background-image: url("/src/assets/images/buttons/confirm.png");
+    background-image: url("@/assets/images/buttons/confirm.png");
 }
 
 .danger {

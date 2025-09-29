@@ -1,13 +1,13 @@
-<script setup>
-import { useTagSelector } from "/src/stores/TagSelector";
-import CustomDialog from "/src/components/common/CustomDialog.vue";
-import CustomToast from "/src/components/common/CustomToast.vue";
-import RightClickMenu from "/src/components/common/RightClickMenu.vue";
-import TagSelector from "/src/components/layout/TagSelector.vue";
-import Home from "/src/views/Home.vue";
-import Playlist from "/src/views/Playlist.vue";
-import Upload from "/src/views/Upload.vue";
-import Profile from "/src/views/Profile.vue";
+<script setup lang="ts">
+import { useTagSelector } from "@/stores/tagSelector";
+import CustomDialog from "@/components/common/CustomDialog.vue";
+import CustomToast from "@/components/common/CustomToast.vue";
+import RightClickMenu from "@/components/common/RightClickMenu.vue";
+import TagSelector from "@/components/layout/TagSelector.vue";
+import Home from "@/views/Home.vue";
+import Playlist from "@/views/Playlist.vue";
+import Upload from "@/views/Upload.vue";
+import Profile from "@/views/Profile.vue";
 
 // 选择标签
 const tagStore = useTagSelector();

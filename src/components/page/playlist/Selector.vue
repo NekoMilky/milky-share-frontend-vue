@@ -1,16 +1,17 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
-import { debouncedRef } from "/src/utils/Utility";
-import { usePlaylist } from "/src/stores/Playlist";
-import Playlist from "/src/components/page/playlist/Playlist.vue";
+import type { Playlist } from "@/types";
+import { debouncedRef } from "@/utils";
+import { usePlaylist } from "@/stores/playlist";
+import PlaylistComponent from "@/components/page/playlist/Playlist.vue";
 
-import addImg from "/src/assets/images/buttons/add.png";
+import addImg from "@/assets/images/buttons/add.png";
 
 const playlistStore = usePlaylist();
 
 // 歌单搜索
-const searchQuery = debouncedRef("");
-const searchFilter = (list) => {
+const searchQuery = debouncedRef<string>("");
+const searchFilter = (list: Array<Playlist>): Array<Playlist> => {
     if (!searchQuery.value) {
         return list;
     }
@@ -19,10 +20,10 @@ const searchFilter = (list) => {
         return playlist.name.toLowerCase().includes(lowerSearchQuery);
     });
 };
-const finalCreatePlaylist = computed(() => {
+const finalCreatePlaylist = computed<Array<Playlist>>(() => {
     return searchFilter(playlistStore.createPlaylist);
 });
-const finalStarPlaylist = computed(() => {
+const finalStarPlaylist = computed<Array<Playlist>>(() => {
     return searchFilter(playlistStore.starPlaylist);
 });
 </script>
@@ -33,14 +34,14 @@ const finalStarPlaylist = computed(() => {
             <!--搜索歌单-->
             <input v-model="searchQuery" class="input-frame with-icon" type="text" placeholder="搜索歌单" />
             <!--创建的歌单-->
-            <Playlist 
+            <PlaylistComponent 
                 style="height: 45%;" 
                 :label="'创建的歌单'" 
                 :list="finalCreatePlaylist" 
                 :button="{ src: addImg, onClick: playlistStore.playlistCreate }" 
             />
             <!--收藏的歌单-->
-            <Playlist 
+            <PlaylistComponent 
                 style="height: 45%;" 
                 :label="'收藏的歌单'" 
                 :list="finalStarPlaylist" 
@@ -50,7 +51,7 @@ const finalStarPlaylist = computed(() => {
     <template v-else>
         <div class="container">
             <!--创建歌单-->
-            <Playlist 
+            <PlaylistComponent 
                 :label="'创建的歌单'" 
                 :list="finalCreatePlaylist" 
                 :button="{ src: addImg, onClick: playlistStore.playlistCreate }" 
@@ -67,6 +68,6 @@ const finalStarPlaylist = computed(() => {
 .input-frame {
     width: 90%;
     height: 5%;
-    background-image: url("/src/assets/images/buttons/search.png");
+    background-image: url("@/assets/images/buttons/search.png");
 }
 </style>
