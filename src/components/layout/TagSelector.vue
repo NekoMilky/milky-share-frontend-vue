@@ -14,57 +14,54 @@ const props = defineProps({
 
 <template>
     <div class="container">
-        <RouterLink 
-            v-for="tag in props.tags"
-            :to="tag.path" 
-            class="row" 
-            :class="{ 'row-selected': route.path === tag.path }"
-        >
-            <img class="button" :class="{ 'avatar': tag.isAvatar }" :src="tag.iconSrc" />
-            <span>{{ tag.label }}</span>
-        </RouterLink>
+        <div class="row-list">
+            <RouterLink 
+                v-for="tag in props.tags"
+                :to="tag.path" 
+                class="row" 
+                :class="{ 'row-selected': route.path === tag.path }"
+            >
+                <img class="button" :class="{ 'avatar': tag.isAvatar }" :src="tag.iconSrc" />
+                <span>{{ tag.label }}</span>
+            </RouterLink>
+        </div>
     </div>
 </template>
 
 <style scoped>
 .container {
-    width: 25%;
-    height: auto;
+    width: auto;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    flex-direction: column;
     transition: var(--transition-duration);
 }
 
-.container:hover {
-    width: 50%;
+.row-list {
+    width: auto;
+    height: auto;
+    display: inline-block;
 }
 
-.container .button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
-    height: 60%;
+.button {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    height: 100%;
     aspect-ratio: 1;
     transition: var(--transition-duration);
 }
 
-.container:hover .button {
-    left: 15%;
-    transform: translate(0, -50%);
-}
-
-.container span {
-    position: absolute;
-    top: 50%;
-    right: 15%;
-    transform: translate(0, -50%);
+span {
     opacity: 0;
-    font-size: 0.1em;
+    font-size: 0;
     transition: var(--transition-duration);
 }
 
 .container:hover span {
     opacity: 1;
     font-size: 1em;
+    margin-right: 0.5em;
 }
 
 .avatar {
@@ -72,14 +69,20 @@ const props = defineProps({
 }
 
 .row {
-    position: relative;
     width: 100%;
-    height: 2em;
-    margin: 0.25em;
+    height: 2.4em;
+    margin: 0.25em 0;
+    padding: 0.5em;
+    box-sizing: border-box;
     border-radius: 1.5em;
     background-color: transparent;
     transition: var(--transition-duration);
     color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    text-decoration: none;
 }
 
 .row:not(.row-selected):hover {

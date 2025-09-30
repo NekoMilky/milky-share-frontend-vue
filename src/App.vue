@@ -63,10 +63,8 @@ watch(() => route.path, (newValue, oldValue) => {
         <CustomDialog />
         <CustomToast />
         <RightClickMenu />
-        <div class="column column-tag">
-            <TagSelector class="box" :tags="tags" />
-        </div>
-        <div class="column column-page">
+        <TagSelector class="box tag-selector" :tags="tags" />
+        <div class="page-container">
             <RouterView #="{ Component }">
                 <Transition :name="tagAnimation">
                     <component :is="Component" />
@@ -80,27 +78,23 @@ watch(() => route.path, (newValue, oldValue) => {
 .app {
     width: 100vw;
     height: 100vh;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.column {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
-.column-page {
     position: relative;
-    width: 60%;
 }
 
-.column-tag {
-    width: 20%;
+.page-container {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 100%;
+}
+
+.tag-selector {
+    position: absolute;
+    left: 0;
+    top: 0;
+    max-width: 15%;
 }
 
 .slide-up-enter-from, .slide-down-leave-to {
