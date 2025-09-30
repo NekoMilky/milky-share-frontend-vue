@@ -1,5 +1,5 @@
 dist/
 node_modules/
 .vscode/
-public/
+public/config.json
 server/index.js
