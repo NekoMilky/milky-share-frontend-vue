@@ -9,7 +9,7 @@ export interface ApiResponse {
 export interface PageTag {
     path: string,
     iconSrc: string,
-    isAvatar?: boolean,
+    isIconCircle: boolean,
     label: string
 };
 

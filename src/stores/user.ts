@@ -3,23 +3,12 @@ import { computed, onMounted, ref } from "vue";
 import type { ApiResponse, JSONObject, User } from "@/types";
 import { isSuccessWithToast, checkEmptyField, hasObjectChanges } from "@/utils";
 import { login, register, get, saveProfile } from "@/api/user";
-import { useRoute, useRouter } from "vue-router";
 import { useDialog } from "./dialog";
 import { usePlaylist } from "./playlist";
 
 export const useUser = defineStore("user", () => {
-    const route = useRoute();
-    const router = useRouter();
     const dialogStore = useDialog();
     const playlistStore = usePlaylist();
-
-    // 游客禁止访问的路由
-    const routeBannedVistor: Array<string> = [ "/playlist", "/upload" ];
-    const checkBanned = (): void => {
-        if (!isLogged.value && routeBannedVistor.includes(route.path)) {
-            router.push("/home");
-        }
-    };
 
     // 当前登录用户
     const emptyUser = (): User => ({
@@ -35,13 +24,11 @@ export const useUser = defineStore("user", () => {
     const updateProfile = async (): Promise<void> => {
         if (!isLogged.value) {
             user.value = emptyUser();
-            checkBanned();
             return;
         }
         const response = await get(user.value.id);
         user.value = emptyUser();
         if (!isSuccessWithToast(response, true)) {
-            checkBanned();
             return;
         }
         user.value = response.data?.user as User;

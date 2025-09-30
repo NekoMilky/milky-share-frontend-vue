@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PageTag } from "./types";
 import { ref, computed, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useUser } from "@/stores/user";
 import CustomDialog from "@/components/common/CustomDialog.vue";
 import CustomToast from "@/components/common/CustomToast.vue";
@@ -9,38 +9,38 @@ import RightClickMenu from "@/components/common/RightClickMenu.vue";
 import TagSelector from "@/components/layout/TagSelector.vue";
 
 import defaultAvatarImg from "@/assets/images/default/avatar.png";
-import homeImg from "@/assets/images/buttons/home.png";
-import playlistImg from "@/assets/images/buttons/playlist.png";
-import uploadImg from "@/assets/images/buttons/upload.png";
 
 const route = useRoute();
+const router = useRouter();
 const userStore = useUser();
 
 // 标签
 const tags = computed<Array<PageTag>>(() => {
-    return [
-        {
-            path: "/profile", 
-            iconSrc: userStore.user.avatar ?? defaultAvatarImg, 
-            isAvatar: true,
-            label: userStore.isLogged ? "档案" : "未登录" 
-        },
-        {
-            path: "/home",
-            iconSrc: homeImg,
-            label: "首页"
-        },
-        {
-            path: "/playlist",
-            iconSrc: playlistImg,
-            label: "歌单"
-        },
-        {
-            path: "/upload",
-            iconSrc: uploadImg,
-            label: "上传"
+    const routes = router.getRoutes();
+    return routes.filter((r) => {
+        const meta = r.meta;
+        if (!meta.showInTagSelector) {
+            return false;
         }
-    ];
+        return !meta.requireAuth || userStore.isLogged;
+    }).map((r) => {
+        const meta = r.meta;
+        const isProfile = meta.isProfile ?? false;
+        let label = meta.label ?? "";
+        let iconSrc = meta.iconSrc ?? "";
+        // 如果是档案选项，动态调整标签和图标
+        if (isProfile) {
+            label = userStore.isLogged ? userStore.user.nickname : "未登录";
+            iconSrc = userStore.isLogged ? (userStore.user.avatar ?? defaultAvatarImg) : defaultAvatarImg;
+        }
+        const pageTag = {
+            path: r.path,
+            label: label,
+            iconSrc: iconSrc,
+            isIconCircle: isProfile
+        } as PageTag;
+        return pageTag;
+    });
 });
 
 // 标签顺序与切换动画
@@ -86,7 +86,7 @@ watch(() => route.path, (newValue, oldValue) => {
     left: 50%;
     top: 0;
     transform: translateX(-50%);
-    width: 70%;
+    width: 60%;
     height: 100%;
 }
 

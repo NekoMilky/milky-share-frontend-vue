@@ -21,7 +21,7 @@ const props = defineProps({
                 class="row" 
                 :class="{ 'row-selected': route.path === tag.path }"
             >
-                <img class="button" :class="{ 'avatar': tag.isAvatar }" :src="tag.iconSrc" />
+                <img class="button" :class="{ 'avatar': tag.isIconCircle }" :src="tag.iconSrc" />
                 <span>{{ tag.label }}</span>
             </RouterLink>
         </div>
