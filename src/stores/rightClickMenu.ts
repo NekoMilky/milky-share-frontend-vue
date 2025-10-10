@@ -1,6 +1,7 @@
+import type { RightClickMenu } from "@/types";
+
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { RightClickMenu } from "@/types";
 
 interface Point2D {
     x: number,
@@ -14,23 +15,31 @@ export const useRightClickMenu = defineStore("rightClickMenu", () => {
     const loadMenu = (mouseEvent: MouseEvent, menusVal: Array<RightClickMenu>) => {
         pos.value = { x: mouseEvent.clientX, y: mouseEvent.clientY };
         menus.value = menusVal;
+
+        // 打开菜单
         open();
     };
     
     // 菜单打开/关闭
-    const isOpened = ref(false);
-    const open = () => {
+    const isOpened = ref<boolean>(false);
+    const open = (): void => {
         isOpened.value = true;
     };
-    const close = () => {
+    const close = (): void => {
         isOpened.value = false;
+    };
+    const onClick = (index: number): void => {
+        close();
+        menus.value[index]?.onClick();
     };
 
     return {
         menus,
         pos,
         isOpened,
+
         loadMenu,
-        close
+        close,
+        onClick
     };
 });

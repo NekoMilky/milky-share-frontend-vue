@@ -1,5 +1,5 @@
 import type { ApiResponse, Song } from "@/types";
-import { sendPost, sendGet } from "./index";
+import { sendPost, sendGet } from "@/api";
 
 export const upload = async (
     songFile: File, 

@@ -1,78 +1,69 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { dateFormat, isSuccessWithToast, compressImage } from "@/utils";
-import { usePlaylist } from "@/stores/playlist";
+import type { Playlist } from "@/types";
 
-import defaultCoverImg from "@/assets/images/default/cover.png";
-import defaultAvatarImg from "@/assets/images/default/avatar.png";
+import { ref, watch } from "vue";
 
-const playlistStore = usePlaylist();
+import { dateFormat } from "@/utils";
 
-// 处理封面选择
-const coverInput = ref<HTMLInputElement | null>(null);
-const selectFiles = async (files: FileList | null | undefined): Promise<void> => {
-    if (!files) {
-        isSuccessWithToast({ message: "请选择文件", success: false });
-        return;
-    }
-    const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
-    if (imageFiles.length === 0) {
-        isSuccessWithToast({ message: "请选择图像文件", success: false });
-        return;
-    }
-    const cover = imageFiles[0];
-    if (cover) {
-        playlistStore.saveViewingPlaylistInfo(await compressImage(cover));
-    }
-};
-const checkInputEvent = (event: InputEvent): void => {
-    selectFiles((event.target as HTMLInputElement).files);
+import CustomInput from "@/components/common/CustomInput.vue";
+import ImageChooser from "@/components/common/ImageChooser.vue";
+
+import DefaultCoverImage from "@/assets/images/default/cover.png";
+import DefaultAvatarImage from "@/assets/images/default/avatar.png";
+
+const props = withDefaults(defineProps<{
+    modelValue: Playlist,
+    isOwner: boolean,
+    onSave: (cover?: File) => void
+}>(), {
+    isOwner: false,
+    onSave: () => {}
+});
+
+// 处理歌单信息
+const playlistInfo = ref<Playlist>(props.modelValue);
+watch(() => props.modelValue, value => {
+    playlistInfo.value = value;
+});
+const emit = defineEmits<{
+    (event: "update:modelValue", value: Playlist): void
+}>();
+watch(() => playlistInfo.value, value => {
+    emit("update:modelValue", value);
+});
+
+// 处理封面上传
+const selectCoverFile = (cover: File | null): void => {
+    if (cover) props.onSave(cover);
 };
 </script>
 
 <template>
     <div class="container">
-        <div class="playlist-cover">
-            <!--创建者可修改封面-->
-            <template v-if="playlistStore.isViewingPlaylistEditable">
-                <img 
-                    class="cover cover-modify" 
-                    :src="playlistStore.viewingPlaylist.cover ?? defaultCoverImg" 
-                    @click="coverInput?.click()"
-                />
-                <input 
-                    type="file" 
-                    ref="coverInput" 
-                    accept="image/*" 
-                    style="display: none;"
-                    @change="checkInputEvent($event as InputEvent)" 
-                />
-            </template>
-            <template v-else>
-                <img class="cover" :src="playlistStore.viewingPlaylist.cover ?? defaultCoverImg" />
-            </template>
-        </div>
+        <!--歌单封面-->
+        <ImageChooser 
+            class="cover"
+            :imageSrc="playlistInfo.cover ?? DefaultCoverImage" 
+            :editable="props.isOwner"
+            :onSelected="selectCoverFile"
+        />
         <div class="playlist-info">
-            <!--创建者可修改名称-->
-            <template v-if="playlistStore.isViewingPlaylistEditable">
-                <input 
-                    v-model="playlistStore.viewingPlaylist.name"
-                    class="input-frame playlist-name"
-                    type="text" 
-                    placeholder="请输入歌单名" 
-                    v-on:blur="playlistStore.saveViewingPlaylistInfo(null)"
-                />
-            </template>
-            <template v-else>
-                <div class="playlist-name">{{ playlistStore.viewingPlaylist.name }}</div>
-            </template>
+            <!--歌单名称-->
+            <CustomInput
+                class="playlist-name"
+                v-model="playlistInfo.name"
+                :editable="props.isOwner"
+                :placeHolder="'请输入歌单名'"
+                :onBlur="props.onSave"
+            />
+            <!--其他信息-->
             <div class="playlist-create">
                 <div class="cell">
-                    <img class="avatar" :src="playlistStore.viewingPlaylist.createUser?.avatar ?? defaultAvatarImg" />
-                    {{ playlistStore.viewingPlaylist.createUser?.nickname }}
+                    <img class="avatar" :src="playlistInfo.createUser?.avatar ?? DefaultAvatarImage" />
+                    {{ playlistInfo.createUser?.nickname }}
                 </div>
-                <div class="cell">
-                    {{ `${dateFormat(playlistStore.viewingPlaylist.createTime ?? '')}创建` }}
+                <div class="cell create-time content-with-icon">
+                    {{ `${dateFormat(playlistInfo.createTime ?? '')}创建` }}
                 </div>
             </div>
         </div>
@@ -82,53 +73,30 @@ const checkInputEvent = (event: InputEvent): void => {
 <style scoped>
 .container {
     flex-direction: row;
-}
-
-.playlist-cover {
-    width: 20%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+    padding: 0.5em;
+    gap: 1em;
 }
 
 .cover {
-    height: 90%;
+    height: 6em;
     aspect-ratio: 1;
     border-radius: 50%;
 }
 
-.cover-modify {
-    filter: brightness(1);
-    transform: var(--transition-duration);
-}
-
-.cover-modify:hover {
-    cursor: pointer;
-    filter: brightness(0.8);
-}
-
-.input-frame {
-    width: 90%;
-}
-
 .playlist-info {
-    width: 75%;
+    flex: 1;
+    min-width: 0;
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
+    gap: 0.25em;
 }
 
 .playlist-name {
     width: 100%;
     height: auto;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
     font-size: 1.2em;
     font-weight: bold;
 }
@@ -140,20 +108,26 @@ const checkInputEvent = (event: InputEvent): void => {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    gap: 2em;
 }
 
 .cell {
-    margin: 0 0.5em;
+    width: auto;
+    height: auto;
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
     align-items: center;
+    gap: 0;
 }
 
 .avatar {
-    height: 1.5em;
+    height: 1.4em;
     margin-right: 0.5em;
     aspect-ratio: 1;
     border-radius: 50%;
+}
+
+.create-time {
+    background-image: url("@/assets/images/buttons/time.png"); 
 }
 </style>

@@ -1,62 +1,59 @@
 <script setup lang="ts">
-import { useDialog } from "@/stores/dialog";
+import { useCustomDialog } from "@/stores";
 
-const dialogStore = useDialog();
+import CustomInput from "@/components/common/CustomInput.vue";
+
+const customDialogStore = useCustomDialog();
 </script>
 
 <template>
-    <Teleport to="body">
-        <div class="dialog" v-if="dialogStore.isOpened">
-            <div class="dialog-box">
-                <div class="dialog-content scrollbar-column">
-                    <div
-                        class="row"
-                        v-for="row in dialogStore.rows"
-                        :key="row.key"
-                        :class="{ 'danger': row.danger }"
-                    >
-                        <template v-if="row.type === 'text'">{{ row.text }}</template>
-                        <template v-if="row.type === 'input'">
-                            <template v-if="row.input?.type === 'text'">
-                                <div class="input-label text-input-label">{{ row.input.label }}</div>
-                                <input 
-                                    v-model="dialogStore.values[row.key]" 
-                                    type="text"
-                                    class="input-frame" 
-                                    :placeholder="row.input.placeholder"
-                                />
-                            </template>
-                            <template v-else-if="row.input?.type === 'checkbox'">
-                                <input 
-                                    v-model="dialogStore.values[row.key]" 
-                                    type="checkbox"
-                                    class="checkbox-input"
-                                />
-                                <div class="input-label checkbox-input-label">{{ row.input.label }}</div>
-                            </template>
+    <div class="dialog" v-show="customDialogStore.isOpened">
+        <div class="dialog-box">
+            <div class="dialog-content scrollbar-column">
+                <div
+                    class="row"
+                    v-for="row in customDialogStore.rows"
+                    :key="row.key"
+                    :class="{ 'danger': row.isDanger }"
+                >
+                    <template v-if="row.type === 'text'">{{ row.text }}</template>
+                    <template v-if="row.type === 'input'">
+                        <template v-if="row.input?.type === 'text'">
+                            <div class="input-label text-input-label">{{ row.input.label }}</div>
+                            <CustomInput 
+                                class="text-input" 
+                                v-model="(customDialogStore.values[row.key] as string)" 
+                                :placeHolder="row.input.placeholder"
+                            />
                         </template>
-                    </div>
-                </div>
-                <div class="row button" v-if="dialogStore.confirmAction" @click="dialogStore.submitDialog">
-                    <img class="button-icon" src="@/assets/images/buttons/confirm.png" />
-                    确认
-                </div>
-                <div class="row button" @click="dialogStore.close">
-                    <img class="button-icon" src="@/assets/images/buttons/cancel.png" />
-                    取消
+                        <template v-else-if="row.input?.type === 'checkbox'">
+                            <input 
+                                v-model="customDialogStore.values[row.key]" 
+                                type="checkbox"
+                                class="checkbox-input"
+                            />
+                            <div class="input-label checkbox-input-label">{{ row.input.label }}</div>
+                        </template>
+                    </template>
                 </div>
             </div>
+            <div class="row button" v-show="customDialogStore.confirmAction" @click="customDialogStore.submitDialog">
+                <img class="button-icon" src="@/assets/images/buttons/confirm.png" />确认
+            </div>
+            <div class="row button" @click="customDialogStore.close">
+                <img class="button-icon" src="@/assets/images/buttons/cancel.png" />取消
+            </div>
         </div>
-    </Teleport>
+    </div>
 </template>
 
 <style scoped>
 .dialog {
     position: fixed;
-    width: 100vw;
-    height: 100vh;
     left: 0;
     top: 0;
+    width: 100vw;
+    height: 100dvh;
     background-color: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(1px);
     display: flex;
@@ -75,34 +72,37 @@ const dialogStore = useDialog();
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(3px);
     font-family: "Aa小迷糊少女";
-    font-size: 1.2rem;
     color: white;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 0.5em;
 }
 
 .dialog-content {
-    width: 95%;
+    width: 100%;
     height: auto;
-    flex: 1;
-    overflow-y: auto;
-    margin: 0.5em;
+    padding: 0.5em;
+    box-sizing: border-box;
+    overflow: hidden auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
 }
 
 .row {
     width: 100%;
     height: 2em;
-    margin: 0.25em 0;
     border-radius: 1.5em;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
+    gap: 0.5em;
 }
 
 .input-label {
-    height: 100%;
+    width: auto;
+    height: auto;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -114,7 +114,9 @@ const dialogStore = useDialog();
 }
 
 .checkbox-input-label {
-    width: 75%;
+    flex: 1;
+    min-width: 0;
+    max-width: 75%;
     justify-content: flex-start;
 }
 
@@ -125,7 +127,6 @@ const dialogStore = useDialog();
     appearance: none;
     border: 1px groove white;
     outline: none;
-    border-radius: 0.5em;
 }
 
 .checkbox-input::before, .checkbox-input::after {
@@ -135,15 +136,16 @@ const dialogStore = useDialog();
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border-radius: 0.5em;
     background-color: transparent;
-    transition: var(--transition-duration);
+    transition: background-color var(--transition-duration);
+    will-change: background-color;
 }
 
 .checkbox-input:hover::before {
     width: 100%;
     height: 100%;
     background-color: var(--hovered-background-color);
+    transform: translateZ(0);
 }
 
 .checkbox-input::after {
@@ -155,25 +157,28 @@ const dialogStore = useDialog();
     background-color: white;
 }
 
-.input-frame {
-    width: 75%;
+.text-input {
+    flex: 1;
+    min-width: 0;
+    height: auto;
 }
 
 .button {
     justify-content: center;
     background-color: transparent;
-    transition: var(--transition-duration);
+    transition: background-color var(--transition-duration);
+    will-change: background-color;
 }
 
 .button:hover {
     cursor: pointer;
     background-color: var(--hovered-background-color);
+    transform: translateZ(0);
 }
 
 .button-icon {
     height: 60%;
     aspect-ratio: 1;
-    margin-right: 0.5em;
 }
 
 .danger {

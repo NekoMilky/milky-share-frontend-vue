@@ -1,5 +1,5 @@
 import type { ApiResponse, User } from "@/types";
-import { sendPost } from "./index";
+import { sendPost } from "@/api";
 
 export const login = async (
     nickname: string, 
@@ -25,23 +25,25 @@ export const register = async (
     return response;
 };
 
-export const get = async (userId: string): Promise<ApiResponse> => {
+export const get = async (userId?: string, nickname?: string): Promise<ApiResponse> => {
     const data = {
-        userId: userId
+        userId: userId,
+        nickname: nickname
     };
     const response = await sendPost("user/get", data, {});
     return response;
 };
 
 export const saveProfile = async (
-    avatarFile: File | null, 
+    operatorUserId: string,
     userInfo: User
 ): Promise<ApiResponse> => {
     const formData = new FormData();
+    formData.append("operatorUserId", operatorUserId);
     formData.append("userId", userInfo.id);
     formData.append("nickname", userInfo.nickname);
-    if (avatarFile) {
-        formData.append("avatar", avatarFile);
+    if (userInfo.avatarFile) {
+        formData.append("avatar", userInfo.avatarFile);
     }
     const response = await sendPost("user/save_profile", formData, {});
     return response;

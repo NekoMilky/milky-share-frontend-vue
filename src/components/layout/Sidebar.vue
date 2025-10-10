@@ -1,47 +1,42 @@
 <script setup lang="ts">
-import type { PageTag } from "@/types";
+import type { Page } from "@/types";
+
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-const route = useRoute();
+import { usePage } from "@/stores";
 
-const props = defineProps({
-    tags: {
-        type: Array<PageTag>,
-        default: []
-    }
-});
+const route = useRoute();
+const pageStore = usePage();
+
+const tags = computed<Array<Page>>(() => 
+    pageStore.pages.filter(page => page.showInSidebar && pageStore.hasPermissionOfPage(page))
+);
 </script>
 
 <template>
     <div class="container">
-        <div class="row-list">
-            <RouterLink 
-                v-for="tag in props.tags"
-                :to="tag.path" 
-                class="row" 
-                :class="{ 'row-selected': route.path === tag.path }"
-            >
-                <img class="button" :class="{ 'avatar': tag.isIconCircle }" :src="tag.iconSrc" />
-                <span>{{ tag.label }}</span>
-            </RouterLink>
-        </div>
+        <RouterLink 
+            v-for="tag in tags"
+            :key="tag.name"
+            :to="tag.pathWithParameter" 
+            class="row" 
+            :class="{ 'row-selected': route.path === tag.pathWithParameter }"
+        >
+            <img class="button" :class="{ 'circle': tag.isIconCircle }" :src="tag.iconSrc" />
+            <span>{{ tag.label }}</span>
+        </RouterLink>
     </div>
 </template>
 
 <style scoped>
 .container {
-    width: auto;
-    height: 100%;
-    margin: 0;
+    padding: 0.5em;
+    justify-content: center;
     border-radius: 0;
-    flex-direction: column;
+    gap: 0.5em;
+    backdrop-filter: blur(3px);
     transition: var(--transition-duration);
-}
-
-.row-list {
-    width: auto;
-    height: auto;
-    display: inline-block;
 }
 
 .button {
@@ -64,33 +59,35 @@ span {
     margin-right: 0.5em;
 }
 
-.avatar {
+.circle {
     border-radius: 50%;
 }
 
 .row {
     width: 100%;
     height: 2.4em;
-    margin: 0.25em 0;
     padding: 0.5em;
     box-sizing: border-box;
     border-radius: 1.5em;
     background-color: transparent;
-    transition: var(--transition-duration);
-    color: white;
+    transition: background-color var(--transition-duration);
+    will-change: background-color;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
     text-decoration: none;
+    color: white;
 }
 
 .row:not(.row-selected):hover {
     cursor: pointer;
     background-color: var(--hovered-background-color);
+    transform: translateZ(0);
 }
 
 .row-selected {
     background-color: var(--selected-background-color);
+    transform: translateZ(0);
 }
 </style>

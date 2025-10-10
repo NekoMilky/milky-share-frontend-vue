@@ -1,11 +1,14 @@
 :root {
+    --transition-duration: 0.3s;
+
     --hovered-background-color: rgba(255, 255, 255, 0.1);
     --selected-background-color: rgba(255, 255, 255, 0.2);
-    --transition-duration: 0.3s;
+
     --error-color: rgba(255, 62, 63, 0.9);
     --success-color: rgba(63, 158, 66, 0.9);
     --warn-color: rgba(254, 176, 7, 0.9);
     --danger-color: rgb(255, 128, 128);
+
     --scrollbar-width: 6px;
     --scrollbar-track-color: var(--selected-background-color);
     --scrollbar-track-border-radius: 10px;
@@ -21,36 +24,30 @@ body {
     overflow: hidden;
     margin: 0;
     padding: 0;
-    background-image: url("@/assets/images/background.png");
-    background-size: cover;
-    background-repeat: no-repeat;
+    font-family: "Aa小迷糊少女";
+    color: white;
 }
 
 .container {
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
     align-items: center;
+    border-radius: 1em;
 }
 
-.box {
-    width: 100%;
-    height: 100%;
-    margin: 0.25em;
-    padding: 0.5em;
-    box-sizing: border-box;
-    align-items: center;
-    justify-content: space-around;
-    display: flex;
-    flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 1.5em;
-    backdrop-filter: blur(3px);
-    font-family: "Aa小迷糊少女";
-    font-size: 1.2rem;
-    color: white;
+.primary-color {
+    background-color: rgba(14, 14, 16, 0.3);
+}
+
+.secondary-color {
+    background-color: rgba(28, 28, 30, 0.3);
+}
+
+.tertiary-color {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .page {
@@ -58,13 +55,24 @@ body {
     left: 0;
     top: 0;
     width: 100%;
-    height: 100%;
+    height: auto;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.subpage {
+    width: min(1024px, 100%);
+    height: auto;
     padding: 0.5em;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 0.5em;
+    z-index: 100;
 }
 
 .scrollbar-column::-webkit-scrollbar {
@@ -98,32 +106,7 @@ body {
     background-color: rgb(192, 192, 192);
 }
 
-.input-frame {
-    padding: 0.5em 1em;
-    box-sizing: border-box;
-    border: none;
-    outline: none;
-    border-radius: 1em;
-    background-color: transparent;
-    color: white;
-    font-family: "Aa小迷糊少女";
-    font-size: 1em;
-    transition: var(--transition-duration);
-}
-
-.input-frame:not(.input-frame:focus):hover {
-    background-color: var(--hovered-background-color);
-}
-
-.input-frame:focus {
-    background-color: var(--selected-background-color);
-}
-
-.input-frame::placeholder {
-    color: rgb(192, 192, 192);
-}
-
-.with-icon {
+.content-with-icon {
     padding: 0.5em 1em 0.5em 2em;
     background-size: 1em;
     background-position: 0.6em center;

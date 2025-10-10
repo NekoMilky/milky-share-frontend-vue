@@ -1,5 +1,5 @@
 import type { IPicture } from "music-metadata";
-import { isSuccessWithToast } from "./validation";
+import { isSuccessWithToast } from "@/utils/validation";
 
 // 压缩图片
 const compressImageWithSource = async (
@@ -19,9 +19,7 @@ const compressImageWithSource = async (
         // 用canvas压缩
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            throw new Error();
-        }
+        if (!ctx) throw new Error();
         // 计算
         let { width, height } = img;
         const scale = Math.min(maxSize / width, maxSize / height);
@@ -34,12 +32,10 @@ const compressImageWithSource = async (
         // 压缩
         ctx.drawImage(img, 0, 0, width, height);
         // 转为blob
-        const blobCompressed = await new Promise<Blob | null>((resolve) => {
+        const blobCompressed = await new Promise<Blob | null>(resolve => {
             canvas.toBlob(resolve, format, 0.5);
         });
-        if (!blobCompressed) {
-            throw new Error();
-        }
+        if (!blobCompressed) throw new Error();
         const filePostfix = format.split("/")[1] || "jpeg";
         return new File([blobCompressed], `file.${filePostfix}`, { type: format });
     }

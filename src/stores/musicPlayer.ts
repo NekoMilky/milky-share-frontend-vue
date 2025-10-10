@@ -1,12 +1,15 @@
-import { defineStore } from "pinia";
-import { ref, computed, onMounted } from "vue";
 import type { JSONObject, Song } from "@/types";
+
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+
 import { get } from "@/api/song";
-import { useSongList } from "./songList";
 import { checkEmptyField, isSuccessWithToast } from "@/utils";
 
+import { useSong } from "@/stores/song";
+
 export const useMusicPlayer = defineStore("musicPlayer", () => {
-    const songListStore = useSongList();
+    const songStore = useSong();
 
     // 当前播放音乐
     const audio = ref<HTMLAudioElement | null>(null);
@@ -63,7 +66,7 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
     };
     const createAudioElement = async (url: string): Promise<void> => {
         audio.value = new Audio(url);
-        await new Promise<void>((resolve) => {
+        await new Promise<void>(resolve => {
             audio.value?.addEventListener("canplay", () => {
                 resolve();
             });
@@ -122,11 +125,11 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         if (!isAudioLoaded.value) {
             return;
         }
-        let index = songListStore.songList.findIndex((song) => playingSong.value.id === song.id);
+        let index = songStore.songList.findIndex(song => playingSong.value.id === song.id);
         if (index === -1) {
             return;
         }
-        const length = songListStore.songList.length;
+        const length = songStore.songList.length;
         index += (isPrevious ? -1 : 1);
         if (index < 0) {
             index = length - 1;
@@ -134,7 +137,7 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         else if (index > length - 1) {
             index = 0;
         }
-        const song = songListStore.songList[index];
+        const song = songStore.songList[index];
         if (song) {
             loadSong(song.id);
         }
@@ -160,7 +163,7 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
     }
 
     // 初始化
-    onMounted(async (): Promise<void> => {
+    const init = async (): Promise<void> => {
         // 恢复播放进度
         if (playingSong.value.id) {
             const current = currentTime.value;
@@ -170,7 +173,7 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
                 updateCoverAnimation();
             }
         }
-    });
+    };
 
     return {
         playingSong,
@@ -181,6 +184,8 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         duration,
         progress,
         coverRotation,
+        
+        init,
         loadSong,
         clearSong,
         togglePlay,

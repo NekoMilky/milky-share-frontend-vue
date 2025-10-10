@@ -1,6 +1,8 @@
+import type { JSONObject, DialogRow } from "@/types";
+
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { JSONObject, DialogRow } from "@/types";
+
 import { checkEmptyField } from "@/utils";
 
 interface KeyValuePair {
@@ -8,7 +10,7 @@ interface KeyValuePair {
     value: unknown
 };
 
-export const useDialog = defineStore("dialog", () => {
+export const useCustomDialog = defineStore("customDialog", () => {
     // 加载对话框
     const rows = ref<Array<DialogRow>>([]);
     const confirmAction = ref<Function | null>(null);
@@ -21,15 +23,13 @@ export const useDialog = defineStore("dialog", () => {
         values.value = {};
         rows.value = rowsVal;
         confirmAction.value = confirmAct;
+        
         // 初始化值
-        rows.value.forEach((row) => {
-            if (row.type === "input") {
-                values.value[row.key] = row.input?.value;
-            }
+        rows.value.forEach(row => {
+            if (row.type === "input") values.value[row.key] = row.input?.value;
         });
-        valList.forEach((val) => {
-            values.value[val.key] = val.value;
-        });
+        valList.forEach(val => values.value[val.key] = val.value);
+        
         // 打开对话
         open();
     }; 
@@ -45,12 +45,19 @@ export const useDialog = defineStore("dialog", () => {
 
     // 提交
     const submitDialog = (): void => {
+        // 如果有必填项未填，取消本次提交
         for (const row of rows.value) {
-            if (row.type === "input" && row.input?.required && !checkEmptyField(values.value[row.key], row.input.label)) {
-                return;
-            }
+            if (
+                row.type === "input" 
+                && row.input?.required 
+                && !checkEmptyField(values.value[row.key], row.input.label)
+            ) return;
         }
+
+        // 关闭对话
         close();
+
+        // 执行提交指令
         if (confirmAction.value) {
             confirmAction.value(values.value);
         }
@@ -61,6 +68,7 @@ export const useDialog = defineStore("dialog", () => {
         confirmAction,
         values,
         isOpened,
+
         loadDialog,
         submitDialog,
         close

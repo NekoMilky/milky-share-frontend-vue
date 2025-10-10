@@ -1,27 +1,26 @@
 <script setup lang="ts">
 import type { Playlist } from "@/types";
-import { usePlaylist } from "@/stores/playlist";
 
-import defaultCoverImg from "@/assets/images/default/cover.png";
+import { usePlaylist } from "@/stores";
+
+import DefaultCoverImage from "@/assets/images/default/cover.png";
 
 const playlistStore = usePlaylist();
 
-const props = defineProps({
-    label: {
-        type: String,
-        default: ""
-    },
-    list: {
-        type: Array<Playlist>,
-        default: []
-    },
-    button: {
-        type: Object,
-        default: {
-            src: "",
-            onClick: null
-        }
+const props = withDefaults(defineProps<{
+    label: string,
+    list: Array<Playlist>,
+    button?: {
+        iconSrc: string,
+        onClick: () => void
     }
+}>(), {
+    label: "",
+    list: () => [],
+    button: () => ({
+        iconSrc: "",
+        onClick: () => {}
+    })
 });
 </script>
 
@@ -31,8 +30,8 @@ const props = defineProps({
             {{ props.label }}
             <img 
                 class="button" 
-                v-if="props.button.src"
-                :src="props.button.src"
+                v-if="props.button.iconSrc"
+                :src="props.button.iconSrc"
                 @click="props.button.onClick"
             />
         </div>
@@ -41,11 +40,11 @@ const props = defineProps({
             <div 
                 class="playlist-item"
                 v-for="(playlist, index) in props.list"
-                :class="{ 'item-selected': playlist.id === playlistStore.viewingPlaylist.id }"
                 :key="index"
+                :class="{ 'item-selected': playlist.id === playlistStore.viewingPlaylist.id }"
                 @click="playlistStore.viewPlaylist(playlist.id)"
             >
-                <img class="cover" :src="playlist.cover ?? defaultCoverImg" />
+                <img class="cover" :src="playlist.cover ?? DefaultCoverImage" />
                 {{ playlist.name }}
             </div>
         </div>
@@ -55,39 +54,43 @@ const props = defineProps({
 
 <style scoped>
 .container {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 1em;
+    border-radius: 1em !important;
 }
 
 .playlist-label {
     width: 100%;
-    height: 8%;
+    height: auto;
+    padding: 0.25em;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     font-weight: bold;
+    gap: 0.25em;
 }
 
 .button {
     height: 1em;
     aspect-ratio: 1;
     border-radius: 50%;
-    margin-left: 0.5em;
     padding: 0.25em;
     box-sizing: border-box;
     background-color: transparent;
-    transition: var(--transition-duration);
+    transition: background-color var(--transition-duration);
+    will-change: background-color;
 }
 
 .button:hover {
     cursor: pointer;
     background-color: var(--hovered-background-color);
+    transform: translateZ(0);
 }
 
 .playlist-list {
     width: 100%;
-    height: 85%;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -106,7 +109,7 @@ const props = defineProps({
 }
 
 .playlist-item {
-    width: 90%;
+    width: 100%;
     height: auto;
     box-sizing: border-box;
     padding: 0.5em;
@@ -116,16 +119,19 @@ const props = defineProps({
     justify-content: flex-start;
     align-items: center;
     background-color: transparent;
-    transition: var(--transition-duration);
+    transition: background-color var(--transition-duration);
+    will-change: background-color;
 }
 
 .playlist-item:not(.item-selected):hover {
     cursor: pointer;
     background-color: var(--hovered-background-color);
+    transform: translateZ(0);
 }
 
 .item-selected {
     background-color: var(--selected-background-color);
+    transform: translateZ(0);
 }
 
 .cover {

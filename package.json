@@ -13,6 +13,7 @@
         "start": "node server/index.js"
     },
     "dependencies": {
+        "@vueuse/core": "^13.9.0",
         "axios": "^1.12.2",
         "dotenv": "^17.2.2",
         "express": "^5.1.0",

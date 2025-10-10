@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@/types";
-import { sendPost } from "./index";
+import type { ApiResponse, Playlist } from "@/types";
+import { sendPost } from "@/api";
 
 export const create = async (
     userId: string, 
@@ -22,16 +22,15 @@ export const getAllByUser = async (userId: string): Promise<ApiResponse> => {
 };
 
 export const saveInfo = async (
-    coverFile: File | null, 
-    userId: string, 
-    playlistInfo: any
+    operatorUserId: string,
+    playlistInfo: Playlist
 ): Promise<ApiResponse> => {
     const formData = new FormData();
-    formData.append("userId", userId);
+    formData.append("operatorUserId", operatorUserId);
     formData.append("playlistId", playlistInfo.id);
     formData.append("name", playlistInfo.name);
-    if (coverFile) {
-        formData.append("cover", coverFile);
+    if (playlistInfo.coverFile) {
+        formData.append("cover", playlistInfo.coverFile);
     }
     const response = await sendPost("playlist/save_info", formData);
     return response;

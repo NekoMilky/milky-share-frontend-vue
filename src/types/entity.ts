@@ -1,7 +1,9 @@
 export interface User {
     id: string,
     nickname: string,
-    avatar: string | null
+    avatar: string | null,
+    joinTime?: string,
+    avatarFile?: File | null
 }
 
 export interface Song {
@@ -10,7 +12,11 @@ export interface Song {
     artist: string,
     album: string,
     duration: number,
-    uploader?: string,
+    uploader?: {
+        id: string,
+        nickname: string,
+        avatar?: string
+    },
     cover: File | string | null,
     coverDisplay?: string | null,
     url?: string
@@ -22,5 +28,6 @@ export interface Playlist {
     cover: string | null,
     hasStared?: boolean,
     createTime?: string,
-    createUser?: User
+    createUser?: User,
+    coverFile?: File | null
 };

@@ -1,27 +1,25 @@
 <script setup lang="ts">
-import { useToast } from "@/stores/toast";
+import { useCustomToast } from "@/stores";
 
-import confirmImg from "@/assets/images/buttons/confirm.png";
-import cancelImg from "@/assets/images/buttons/cancel.png";
+import CancelImage from "@/assets/images/buttons/cancel.png";
+import ConfirmImage from "@/assets/images/buttons/confirm.png";
 
-const toastStore = useToast();
+const customToastStore = useCustomToast();
 </script>
 
 <template>
-    <Teleport to="body">
-        <div class="toast-box">
-            <div 
-                class="toast-item"
-                v-for="toast in toastStore.messages"
-                :key="toast.id"
-                :class="{ 'issue': !toast.success }"
-                :style="{ opacity: toast.opacity.toString() }"
-            >
-                <img class="toast-icon" :src="toast.success ? confirmImg : cancelImg" />
-                {{ toast.message }}
-            </div>
+    <div class="toast-box">
+        <div 
+            class="toast-item"
+            v-for="toast in customToastStore.toasts"
+            :key="toast.id"
+            :class="{ 'issue': !toast.success, 'success': toast.success }"
+            :style="{ opacity: toast.opacity }"
+        >
+            <img class="toast-icon" :src="toast.success ? ConfirmImage : CancelImage" />
+            {{ toast.message }}
         </div>
-    </Teleport>
+    </div>
 </template>
 
 <style scoped>
@@ -39,7 +37,6 @@ const toastStore = useToast();
     justify-content: flex-start;
     align-items: center;
     font-family: "Aa小迷糊少女";
-    font-size: 1.2rem;
     color: white;
     z-index: 2000;
 }
@@ -52,12 +49,16 @@ const toastStore = useToast();
     padding: 0.5em 1em 0.5em 2.5em;
     border-radius: 1em;
     box-sizing: border-box;
-    background-color: var(--success-color);
-    transition: var(--transition-duration);
+    transition: opacity var(--transition-duration);
+    will-change: opacity;
 }
 
 .issue {
     background-color: var(--error-color);
+}
+
+.success {
+    background-color: var(--success-color);
 }
 
 .toast-icon {

@@ -1,13 +1,17 @@
+import type { ApiResponse, User } from "@/types";
+
+import router from "@/router";
 import { defineStore } from "pinia";
-import { computed, onMounted, ref } from "vue";
-import type { ApiResponse, JSONObject, User } from "@/types";
+import { computed, ref } from "vue";
+
 import { isSuccessWithToast, checkEmptyField, hasObjectChanges } from "@/utils";
 import { login, register, get, saveProfile } from "@/api/user";
-import { useDialog } from "./dialog";
-import { usePlaylist } from "./playlist";
+
+import { useCustomDialog } from "@/stores/customDialog";
+import { usePlaylist } from "@/stores/playlist";
 
 export const useUser = defineStore("user", () => {
-    const dialogStore = useDialog();
+    const customDialogStore = useCustomDialog();
     const playlistStore = usePlaylist();
 
     // 当前登录用户
@@ -17,7 +21,6 @@ export const useUser = defineStore("user", () => {
         avatar: null
     });
     const user = ref<User>(emptyUser());
-    const userOrigin = ref<JSONObject>({});
     const isLogged = computed<boolean>(() => {
         return user.value.id ? true : false;
     });
@@ -27,24 +30,24 @@ export const useUser = defineStore("user", () => {
             return;
         }
         const response = await get(user.value.id);
-        user.value = emptyUser();
         if (!isSuccessWithToast(response, true)) {
+            user.value = emptyUser();
             return;
         }
         user.value = response.data?.user as User;
-        userOrigin.value = { nickname: user.value.nickname };
         console.log("已更新个人档案");
         // 更新歌单列表
         playlistStore.updatePlaylistList("default");
     };
 
     // 注册、登录与退出登录
-    const handleResponse = (response: ApiResponse): void => {
+    const handleResponse = async (response: ApiResponse): Promise<void> => {
         if (!isSuccessWithToast(response)) {
             return;
         }
         user.value.id = (response.data?.user as User).id;
-        updateProfile();
+        await updateProfile(); 
+        router.push(`/profile/${user.value.nickname}`);
     };
     const userRegister = async (nickname: string, password: string): Promise<void> => {
         handleResponse(await register(nickname, password));
@@ -53,43 +56,50 @@ export const useUser = defineStore("user", () => {
         handleResponse(await login(nickname, password));
     };
     const userLogout = (): void => {
-        dialogStore.loadDialog([
+        customDialogStore.loadDialog([
             { key: "title", type: "text", text: "退出登录确认" }
         ], confirmUserLogout);
     };
-    const confirmUserLogout = (): void => {
+    const confirmUserLogout = async (): Promise<void> => {
         user.value = emptyUser();
-        updateProfile();
+        await updateProfile();
+        router.push("/login");
     };
 
     // 保存档案，包含状态锁
     const isSavingProfile = ref<boolean>(false);
-    const userSaveProfile = async (avatarFile: File | null = null): Promise<void> => {
+    const userSaveProfile = async (userInfo: User): Promise<void> => {
         if (isSavingProfile.value) {
             return;
         }
-        if (!checkEmptyField(user.value.id, "用户id")) {
+        if (!checkEmptyField(userInfo.id, "用户id")) {
             return;
         }
-        if (!avatarFile && !hasObjectChanges(userOrigin.value, user.value)) {
+        const originInfo = { nickname: user.value.nickname };
+        const newInfo = { nickname: userInfo.nickname };
+        if (!userInfo.avatarFile && !hasObjectChanges(originInfo, newInfo)) {
             return;
         }
         // 开始保存
         isSavingProfile.value = true;
-        const response = await saveProfile(avatarFile, user.value);
+        const response = await saveProfile(user.value.id, userInfo);
         isSavingProfile.value = false;
         isSuccessWithToast(response);
+        // 更新档案
         updateProfile();
     };
 
     // 初始化
-    onMounted(() => {
+    const init = (): void => {
         updateProfile();
-    });
+    };
 
     return {
         user,
         isLogged,
+        
+        init,
+        emptyUser,
         userRegister,
         userLogin,
         userLogout,
