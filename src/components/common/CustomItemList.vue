@@ -180,7 +180,7 @@ onMounted(() => {
                 <img 
                     class="sort-icon" 
                     v-show="sortBy === column.key" 
-                    src="@/assets/images/buttons/arrow.png" 
+                    src="@/assets/images/icon/arrow.png" 
                     :style="{ rotate: `${sortDesc ? 90 : -90}deg` }"
                 />
                 <div 

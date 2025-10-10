@@ -158,8 +158,8 @@ const uploadFile = async (): Promise<void> => {
                 </div>
             </div>
             <div class="button-list">
-                <img class="button" src="@/assets/images/buttons/return.png" @click="clearSelectedFile()" />
-                <img class="button" src="@/assets/images/buttons/upload.png" @click="uploadFile()" />
+                <img class="button" src="@/assets/images/icon/return.png" @click="clearSelectedFile()" />
+                <img class="button" src="@/assets/images/icon/upload.png" @click="uploadFile()" />
             </div>
         </div>
         <div v-else class="song-uploading">文件上传中，请稍候</div>

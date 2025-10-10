@@ -10,8 +10,8 @@ import { usePlaylist } from "@/stores";
 import CustomInput from "@/components/common/CustomInput.vue";
 import PlaylistComponent from "@/components/page/playlist/Playlist.vue";
 
-import AddImage from "@/assets/images/buttons/add.png";
-import SearchImage from "@/assets/images/buttons/search.png";
+import AddImage from "@/assets/images/icon/add.png";
+import SearchImage from "@/assets/images/icon/search.png";
 
 const playlistStore = usePlaylist();
 

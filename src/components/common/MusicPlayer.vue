@@ -6,8 +6,8 @@ import { timeFormat } from "@/utils";
 import { useMusicPlayer } from "@/stores";
 
 import DefaultCoverImage from "@/assets/images/default/cover.png";
-import PauseCircleImage from "@/assets/images/buttons-circle/pause.png";
-import PlayCircleImage from "@/assets/images/buttons-circle/play.png";
+import PauseCircleImage from "@/assets/images/icon-circle/pause.png";
+import PlayCircleImage from "@/assets/images/icon-circle/play.png";
 
 const musicPlayerStore = useMusicPlayer();
 
@@ -86,7 +86,7 @@ onMounted(() => {
             <div class="button-list">
                 <img 
                     class="button" 
-                    src="@/assets/images/buttons-circle/previous-song.png" 
+                    src="@/assets/images/icon-circle/previous-song.png" 
                     @click="musicPlayerStore.switchPlay(true)"
                 />
                 <img 
@@ -96,7 +96,7 @@ onMounted(() => {
                 />
                 <img 
                     class="button" 
-                    src="@/assets/images/buttons-circle/next-song.png" 
+                    src="@/assets/images/icon-circle/next-song.png" 
                     @click="musicPlayerStore.switchPlay(false)"
                 />
             </div>

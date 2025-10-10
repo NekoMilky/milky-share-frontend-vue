@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 
-import InvisibleImage from "@/assets/images/buttons/invisible.png";
-import VisibleImage from "@/assets/images/buttons/visible.png";
+import InvisibleImage from "@/assets/images/icon/invisible.png";
+import VisibleImage from "@/assets/images/icon/visible.png";
 
 const props = withDefaults(defineProps<{
     modelValue: string,

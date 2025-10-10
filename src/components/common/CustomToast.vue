@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useCustomToast } from "@/stores";
 
-import CancelImage from "@/assets/images/buttons/cancel.png";
-import ConfirmImage from "@/assets/images/buttons/confirm.png";
+import CancelImage from "@/assets/images/icon/cancel.png";
+import ConfirmImage from "@/assets/images/icon/confirm.png";
 
 const customToastStore = useCustomToast();
 </script>

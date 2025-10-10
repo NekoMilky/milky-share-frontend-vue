@@ -12,14 +12,14 @@ import CustomItemList from "@/components/common/CustomItemList.vue";
 
 import DefaultAvatarImage from "@/assets/images/default/avatar.png";
 import DefaultCoverImage from "@/assets/images/default/cover.png";
-import DeleteImage from "@/assets/images/buttons/delete.png";
-import DownloadImage from "@/assets/images/buttons/download.png";
-import PauseCircleImage from "@/assets/images/buttons-circle/pause.png";
-import PauseImage from "@/assets/images/buttons/pause.png";
-import PlayCircleImage from "@/assets/images/buttons-circle/play.png";
-import PlayImage from "@/assets/images/buttons/play.png";
-import SearchImage from "@/assets/images/buttons/search.png";
-import StarImage from "@/assets/images/buttons/star.png";
+import DeleteImage from "@/assets/images/icon/delete.png";
+import DownloadImage from "@/assets/images/icon/download.png";
+import PauseCircleImage from "@/assets/images/icon-circle/pause.png";
+import PauseImage from "@/assets/images/icon/pause.png";
+import PlayCircleImage from "@/assets/images/icon-circle/play.png";
+import PlayImage from "@/assets/images/icon/play.png";
+import SearchImage from "@/assets/images/icon/search.png";
+import StarImage from "@/assets/images/icon/star.png";
 
 const musicPlayerStore = useMusicPlayer();
 const songStore = useSong();
@@ -176,7 +176,7 @@ const rightClickMenu = (item: unknown): Array<RightClickMenu> => {
                 <template v-else-if="index === hoveredIndex">
                     <img 
                         class="song-item-button" 
-                        src="@/assets/images/buttons-circle/play.png" 
+                        src="@/assets/images/icon-circle/play.png" 
                         @click="musicPlayerStore.loadSong((item as Song).id)"
                     />
                 </template>
@@ -204,7 +204,7 @@ const rightClickMenu = (item: unknown): Array<RightClickMenu> => {
             <template #delete="{ item }">
                 <img 
                     class="song-item-button"
-                    src="@/assets/images/buttons/delete.png"
+                    src="@/assets/images/icon/delete.png"
                     @click="songStore.removeSong((item as Song).id, (item as Song).title)"
                 />
             </template>

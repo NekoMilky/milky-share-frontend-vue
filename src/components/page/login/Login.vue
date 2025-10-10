@@ -7,8 +7,8 @@ import { useUser } from "@/stores";
 
 import CustomInput from "@/components/common/CustomInput.vue";
 
-import UserImage from "@/assets/images/buttons/user.png";
-import PasswordImage from "@/assets/images/buttons/password.png";
+import UserImage from "@/assets/images/icon/user.png";
+import PasswordImage from "@/assets/images/icon/password.png";
 
 const userStore = useUser();
 

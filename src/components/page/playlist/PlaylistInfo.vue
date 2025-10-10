@@ -128,6 +128,6 @@ const selectCoverFile = (cover: File | null): void => {
 }
 
 .create-time {
-    background-image: url("@/assets/images/buttons/time.png"); 
+    background-image: url("@/assets/images/icon/time.png"); 
 }
 </style>

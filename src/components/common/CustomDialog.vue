@@ -38,10 +38,10 @@ const customDialogStore = useCustomDialog();
                 </div>
             </div>
             <div class="row button" v-show="customDialogStore.confirmAction" @click="customDialogStore.submitDialog">
-                <img class="button-icon" src="@/assets/images/buttons/confirm.png" />确认
+                <img class="button-icon" src="@/assets/images/icon/confirm.png" />确认
             </div>
             <div class="row button" @click="customDialogStore.close">
-                <img class="button-icon" src="@/assets/images/buttons/cancel.png" />取消
+                <img class="button-icon" src="@/assets/images/icon/cancel.png" />取消
             </div>
         </div>
     </div>

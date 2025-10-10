@@ -90,6 +90,6 @@ const selectAvatarFile = (avatar: File | null): void => {
 .join-time {
     width: 100%;
     height: auto;
-    background-image: url("@/assets/images/buttons/time.png");
+    background-image: url("@/assets/images/icon/time.png");
 }
 </style>

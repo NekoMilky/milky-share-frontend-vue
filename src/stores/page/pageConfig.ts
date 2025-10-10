@@ -4,8 +4,8 @@ import { defineStore } from "pinia";
 import { computed } from "vue";
 
 import DefaultAvatarImage from "@/assets/images/default/avatar.png";
-import HomeImage from "@/assets/images/buttons/home.png";
-import PlaylistImage from "@/assets/images/buttons/playlist.png";
+import HomeImage from "@/assets/images/icon/home.png";
+import PlaylistImage from "@/assets/images/icon/playlist.png";
 
 export const usePageConfig = defineStore("pageConfig", () => {
     const basePages = computed<Array<PageConfig>>(() => [
