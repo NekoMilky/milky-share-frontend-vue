@@ -1,7 +1,7 @@
 import type { JSONObject, Song } from "@/types";
 
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 import { get } from "@/api/song";
 import { checkEmptyField, isSuccessWithToast } from "@/utils";
@@ -44,9 +44,7 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         songId: string, 
         autoPlay: boolean = true
     ): Promise<boolean> => {
-        if (!checkEmptyField(songId, "歌曲id")) {
-            return false;
-        }
+        if (!checkEmptyField(songId, "歌曲id")) return false;
         isLoading.value = true;
         const response = await get(songId);
         clearSong();
@@ -55,21 +53,19 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
             return false;
         }
         playingSong.value = { ...playingSong.value, ...response.data?.song as JSONObject };
+
         // 创建audio元素
         await createAudioElement(playingSong.value.url as string);
+
         // 自动播放
-        if (autoPlay) {
-            togglePlay();
-        }
+        if (autoPlay) togglePlay();
         isLoading.value = false;
         return true;
     };
     const createAudioElement = async (url: string): Promise<void> => {
         audio.value = new Audio(url);
         await new Promise<void>(resolve => {
-            audio.value?.addEventListener("canplay", () => {
-                resolve();
-            });
+            audio.value?.addEventListener("canplay", () => resolve());
         });
         audio.value.addEventListener("timeupdate", updateProgress);
         isAudioLoaded.value = true;
@@ -79,13 +75,9 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
     const isPlaying = ref<boolean>(false);
     const currentTime = ref<number>(0);
     const duration = ref<number>(0);
-    const progress = computed<number>(() => {
-        return duration.value > 0 ? currentTime.value / duration.value * 100 : 0;
-    });
+    const progress = computed<number>(() => duration.value > 0 ? currentTime.value / duration.value * 100 : 0);
     const togglePlay = (): void => {
-        if (!isAudioLoaded.value || !audio.value) {
-            return;
-        }
+        if (!isAudioLoaded.value || !audio.value) return;
         isPlaying.value = !isPlaying.value;
         if (isPlaying.value) {
             audio.value.play();
@@ -96,51 +88,48 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         }
     };
     const updateProgress = (): void => {
-        if (!isAudioLoaded.value || !audio.value) {
-            return;
-        }
+        if (!isAudioLoaded.value || !audio.value) return;
         currentTime.value = audio.value.currentTime ?? 0;
         duration.value = audio.value.duration ?? 0;
+
         // 播放结束
-        if (duration.value > 0 && currentTime.value >= duration.value - 0.1) {
-            switchPlay(false);
-        }
+        if (duration.value > 0 && currentTime.value >= duration.value - 0.1) switchPlay(false);
     };
     const setCurrentTime = (value: number): void => {
-        if (!isAudioLoaded.value || !audio.value) {
-            return;
-        }
-        if (value < 0 || value >= duration.value) {
-            return;
-        }
+        if (!isAudioLoaded.value || !audio.value) return;
+        if (value < 0 || value >= duration.value) return;
         audio.value.currentTime = value;
         updateProgress();
-        if (!isPlaying.value) {
-            updateCoverAnimation();
-        }
+        if (!isPlaying.value) updateCoverAnimation();
     };
+
+    // 音量调节
+    const volume = ref<number>(1);
+    const setVolume = (value: number): void => {
+        if (!isAudioLoaded.value || !audio.value) return;
+        if (value < 0 || value > 1) return;
+        volume.value = value;
+    };
+    const isMuted = ref<boolean>(false);
+    const toggleMute = (): void => {
+        isMuted.value = !isMuted.value;
+    };
+    watch(() => [audio.value, volume.value, isMuted.value], () => {
+        if (!audio.value) return;
+        audio.value.volume = isMuted.value ? 0 : volume.value;
+    }, { immediate: true });
 
     // 上一首/下一首
     const switchPlay = (isPrevious: boolean = false): void => {
-        if (!isAudioLoaded.value) {
-            return;
-        }
+        if (!isAudioLoaded.value) return;
         let index = songStore.songList.findIndex(song => playingSong.value.id === song.id);
-        if (index === -1) {
-            return;
-        }
+        if (index === -1) return;
         const length = songStore.songList.length;
         index += (isPrevious ? -1 : 1);
-        if (index < 0) {
-            index = length - 1;
-        }
-        else if (index > length - 1) {
-            index = 0;
-        }
+        if (index < 0) index = length - 1;
+        else if (index > length - 1) index = 0;
         const song = songStore.songList[index];
-        if (song) {
-            loadSong(song.id);
-        }
+        if (song) loadSong(song.id);
     };
 
     // 封面旋转
@@ -153,12 +142,8 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
                 return;
             }
             coverRotation.value = audio.value.currentTime * 18 % 360;
-            if (isPlaying.value) {
-                updateCoverAnimation();
-            }
-            else if (coverAnimationId) {
-                cancelAnimationFrame(coverAnimationId);
-            }
+            if (isPlaying.value) updateCoverAnimation();
+            else if (coverAnimationId) cancelAnimationFrame(coverAnimationId);
         });
     }
 
@@ -184,16 +169,20 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         duration,
         progress,
         coverRotation,
+        volume,
+        isMuted,
         
         init,
         loadSong,
         clearSong,
         togglePlay,
         switchPlay,
-        setCurrentTime
+        setCurrentTime,
+        setVolume,
+        toggleMute
     };
 }, {
-    // 只缓存当前歌曲和播放进度
+    // 只缓存当前歌曲、播放进度与音量
     persist: {
         key: "MusicPlayer",
         storage: localStorage,
@@ -202,6 +191,8 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
                 return JSON.stringify({
                     playingSong: value.playingSong,
                     currentTime: value.currentTime,
+                    volume: value.volume,
+                    isMuted: value.isMuted
                 });
             },
             deserialize(value) {
