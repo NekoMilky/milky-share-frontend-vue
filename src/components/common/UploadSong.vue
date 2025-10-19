@@ -39,7 +39,6 @@ const onDrop = (event: DragEvent): void => {
 };
 const clearSelectedFile = (): void => {
     selectedFile.value = null;
-    isUploading.value = false;
 };
 
 // 显示信息
@@ -83,7 +82,6 @@ const updateSongInfo = async (): Promise<void> => {
 };
 
 // 处理文件上传
-const isUploading = ref<boolean>(false);
 const uploadFile = async (): Promise<void> => {
     if (!selectedFile.value) {
         isSuccessWithToast({ message: "没有上传音频文件", success: false });
@@ -93,7 +91,6 @@ const uploadFile = async (): Promise<void> => {
     if (!checkEmptyFields({ title, artist, album }, { title: "标题", artist: "艺术家", album: "专辑" })) return;
 
     // 开始上传
-    isUploading.value = true;
     await songStore.uploadSong(selectedFile.value, songInfo.value);
 
     // 上传结束
@@ -103,23 +100,8 @@ const uploadFile = async (): Promise<void> => {
 
 <template>
     <div class="container">
-        <div 
-            v-if="!selectedFile" 
-            class="upload-area" 
-            @drop.prevent="onDrop" 
-            @dragover.prevent="" 
-            @click="fileInput?.click()"
-        >
-            <input 
-                type="file" 
-                ref="fileInput" 
-                accept="audio/*" 
-                style="display: none;"
-                @change="checkInputEvent($event as InputEvent)" 
-            />
-            点击选择音频文件，或拖拽文件到这里
-        </div>
-        <div v-else-if="!isUploading" class="song-selected">
+        <div v-if="songStore.isUploading" class="song-uploading">文件上传中，请稍候</div>
+        <div v-else-if="selectedFile" class="song-selected">
             <div class="song-info">
                 <img class="song-cover" :src="songInfo.coverDisplay || DefaultCoverImage" />
                 <div class="info-items">
@@ -162,7 +144,22 @@ const uploadFile = async (): Promise<void> => {
                 <img class="button" src="@/assets/images/icon/upload.png" @click="uploadFile()" />
             </div>
         </div>
-        <div v-else class="song-uploading">文件上传中，请稍候</div>
+        <div 
+            v-else 
+            class="upload-area" 
+            @drop.prevent="onDrop" 
+            @dragover.prevent="" 
+            @click="fileInput?.click()"
+        >
+            <input 
+                type="file" 
+                ref="fileInput" 
+                accept="audio/*" 
+                style="display: none;"
+                @change="checkInputEvent($event as InputEvent)" 
+            />
+            点击选择音频文件，或拖拽文件到这里
+        </div>
     </div>
 </template>
 

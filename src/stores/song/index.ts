@@ -44,22 +44,22 @@ export const useSong = defineStore("song", () => {
         console.log("已更新歌单的歌曲列表");
     };
 
-    // 上传歌曲
+    // 上传歌曲，包含状态锁
+    const isUploading = ref<boolean>(false);
     const uploadSong = async (
         file: File, 
         info: Song
     ): Promise<void> => {
+        if (isUploading.value) return;
         if (!userStore.isLogged) {
             isSuccessWithToast({ message: "游客无法使用上传功能", success: false });
             return;
         }
-        if (!checkEmptyFields({ file, info }, { file: "音频文件", info: "歌曲元信息" })) {
-            return;
-        }
+        if (!checkEmptyFields({ file, info }, { file: "音频文件", info: "歌曲元信息" })) return;
+        isUploading.value = true;
         const response = await upload(file, info, userStore.user.id);
-        if (!isSuccessWithToast(response)) {
-            return;
-        }
+        isUploading.value = false;
+        if (!isSuccessWithToast(response)) return;
         updateSongList();
     };
 
@@ -69,9 +69,7 @@ export const useSong = defineStore("song", () => {
             isSuccessWithToast({ message: "游客无法删除歌曲", success: false });
             return;
         }
-        if (!checkEmptyField(songId, "歌曲id")) {
-            return;
-        }
+        if (!checkEmptyField(songId, "歌曲id")) return;
         customDialogStore.loadDialog([
             { key: "title", type: "text", text: "删除歌曲" },
             { key: "confirm", type: "text", text: `你确定要删除歌曲“${songTitle}”吗？` },
@@ -83,12 +81,8 @@ export const useSong = defineStore("song", () => {
     };
     const confirmRemoveSong = async (values: JSONObject): Promise<void> => {
         const response = await remove(values.userId as string, values.songId as string);
-        if (!isSuccessWithToast(response)) {
-            return;
-        }
-        if (values.songId === musicPlayerStore.playingSong.id) {
-            musicPlayerStore.clearSong();
-        }
+        if (!isSuccessWithToast(response)) return;
+        if (values.songId === musicPlayerStore.playingSong.id) musicPlayerStore.clearSong();
         updateSongList();
         updateViewingSongList(playlistStore.viewingPlaylist.id);
     };
@@ -99,13 +93,9 @@ export const useSong = defineStore("song", () => {
             isSuccessWithToast({ message: "游客无法收藏歌曲", success: false });
             return;
         }
-        if (!checkEmptyField(songId, "歌曲id")) {
-            return;
-        }
+        if (!checkEmptyField(songId, "歌曲id")) return;
         const response = await getPlaylistBySong(userStore.user.id, songId);
-        if (!isSuccessWithToast(response, true)) {
-            return;
-        }
+        if (!isSuccessWithToast(response, true)) return;
         let rows: Array<DialogRow> = [
             { key: "title", type: "text", text: "收藏歌曲" },
             { key: "confirm", type: "text", text: `请选择歌曲“${songTitle}”将要加入的歌单。` }
@@ -129,18 +119,14 @@ export const useSong = defineStore("song", () => {
     const confirmStarSong = async (values: JSONObject): Promise<void> => {
         const { userId, songId, ...starInfo } = values;
         const response = await applyStarSong(userId as string, songId as string, starInfo);
-        if (!isSuccessWithToast(response)) {
-            return;
-        }
+        if (!isSuccessWithToast(response)) return;
         updateViewingSongList(playlistStore.viewingPlaylist.id);
     };
 
     // 下载歌曲
     const downloadSong = async (songId: string): Promise<void> => {
         const response = await get(songId);
-        if (!isSuccessWithToast(response, true)) {
-            return;
-        }
+        if (!isSuccessWithToast(response, true)) return;
         const url = (response.data?.song as Song).url as string;
         const link = document.createElement("a");
         link.href = url;
@@ -156,6 +142,7 @@ export const useSong = defineStore("song", () => {
     return {
         songList,
         viewingSongList,
+        isUploading,
         
         updateViewingSongList,
         uploadSong,
