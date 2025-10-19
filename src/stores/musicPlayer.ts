@@ -22,6 +22,7 @@ export const useMusicPlayer = defineStore("musicPlayer", () => {
         duration: 0,
         url: "",
         cover: null,
+        lyrics: []
     });
     const playingSong = ref<Song>(emptySong());
     const clearSong = (): void => {

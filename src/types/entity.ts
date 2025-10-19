@@ -6,6 +6,10 @@ export interface User {
     avatarFile?: File | null
 }
 
+interface SongLyric {
+    start: number,
+    text: string
+};
 export interface Song {
     id: string,
     title: string,
@@ -17,6 +21,7 @@ export interface Song {
         nickname: string,
         avatar?: string
     },
+    lyrics?: Array<SongLyric> | null,
     cover: File | string | null,
     coverDisplay?: string | null,
     url?: string

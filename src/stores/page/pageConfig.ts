@@ -36,6 +36,11 @@ export const usePageConfig = defineStore("pageConfig", () => {
             showInSidebar: true,
             label: "歌单",
             iconSrc: PlaylistImage
+        },
+        {
+            name: "playing",
+            requireRole: "public",
+            showInSidebar: false
         }
     ]);
 

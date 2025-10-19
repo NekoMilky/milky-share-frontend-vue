@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import router from "@/router";
 import { ref, watch, onMounted, onUnmounted, computed } from "vue";
 
 import { timeFormat } from "@/utils";
@@ -129,7 +130,7 @@ onMounted(() => {
         </div>
         <!--播放器主体-->
         <div class="main-body">
-            <div class="cell cell-main-info">
+            <div class="cell cell-main-info" @click="router.push('/playing')">
                 <img 
                     class="music-cover" 
                     :src="musicPlayerStore.playingSong.cover as string ?? DefaultCoverImage" 
@@ -223,6 +224,7 @@ onMounted(() => {
 
 .cell-main-info {
     left: 0.5em;
+    cursor: pointer;
 }
 
 .cell-primary-button {
