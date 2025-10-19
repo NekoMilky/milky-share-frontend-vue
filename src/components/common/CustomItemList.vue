@@ -199,7 +199,11 @@ onMounted(() => {
                 ></div>
             </div>
         </div>
-        <div class="list-items scrollbar-column" ref="listItems">
+        <div 
+            v-if="finalList.length > 0"
+            class="list-items scrollbar-column" 
+            ref="listItems"
+        >
             <div 
                 class="list-item"
                 v-for="(item, index) in finalList"
@@ -219,6 +223,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+        <div v-else class="list-items list-items-empty">这里空空如也</div>
     </div>
 </template>
 
@@ -275,6 +280,11 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden auto;
+}
+
+.list-items-empty {
+    justify-content: center;
+    align-items: center;
 }
 
 .list-item {
